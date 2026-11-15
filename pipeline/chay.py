@@ -26,8 +26,13 @@ def tim_blender():
         return [os.environ["BLENDER"], "-b", "--factory-startup", "-P"]
     b = shutil.which("blender")
     if not b:
-        cac = sorted(glob.glob("C:/Program Files/Blender Foundation/Blender */blender.exe"))
-        cac += sorted(glob.glob("/Applications/Blender.app/Contents/MacOS/Blender"))
+        mau = [
+            "C:/Program Files/Blender Foundation/Blender*/blender.exe",
+            "C:/Program Files (x86)/Steam/steamapps/common/Blender/blender.exe",
+            os.path.expanduser("~/AppData/Local/Programs/Blender Foundation/Blender*/blender.exe"),
+            "/Applications/Blender.app/Contents/MacOS/Blender",
+        ]
+        cac = [p for m in mau for p in sorted(glob.glob(m))]
         b = cac[-1] if cac else None
     if b:
         return [b, "-b", "--factory-startup", "-P"]
