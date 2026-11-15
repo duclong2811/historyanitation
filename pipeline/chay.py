@@ -11,6 +11,7 @@ Blender: đặt biến môi trường BLENDER=đường/dẫn/blender.exe nếu 
 """
 import glob
 import importlib.util
+import json
 import os
 import shutil
 import subprocess
@@ -43,6 +44,7 @@ def tim_blender():
 
 
 def render(shots, xem_thu, may, chi=None):
+    on_twos = json.loads(Path(shots).read_text(encoding="utf-8")).get("on_twos", True)
     cmd = tim_blender() + [str(HERE / "render_blender.py"), "--", str(shots)]
     if xem_thu:
         cmd.append("--xem-thu")
@@ -50,9 +52,39 @@ def render(shots, xem_thu, may, chi=None):
         cmd += ["--may", may]
     if chi:
         cmd += ["--chi", chi]
-    r = subprocess.run(cmd, cwd=GOC)
-    if r.returncode:
-        sys.exit("Render lỗi, xem thông báo ở trên.")
+    # Lọc output của Blender: bỏ dòng rác (cảnh báo vô hại của Freestyle, từng dòng "Saved"),
+    # chỉ hiện tiến độ và lỗi. Đặt biến môi trường HIEN_HET=1 để xem toàn bộ output gốc.
+    if os.environ.get("HIEN_HET"):
+        r = subprocess.run(cmd, cwd=GOC)
+        if r.returncode:
+            sys.exit("Render lỗi, xem thông báo ở trên.")
+        return
+    BO_QUA = ("appears twice", "EGL Error", "DeprecationWarning", "compositing_node_group",
+              "use_nodes", "gpu.vulkan", "Blender quit", "Fra:", "Read prefs", "Blender 5", "Blender 4")
+    p = subprocess.Popen(cmd, cwd=GOC, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                         text=True, encoding="utf-8", errors="replace")
+    da_luu, tong, cuoi = 0, 0, []
+    for dong in p.stdout:
+        dong = dong.rstrip()
+        cuoi = (cuoi + [dong])[-40:]
+        if not dong or any(k in dong for k in BO_QUA):
+            continue
+        if "Saved:" in dong:
+            da_luu += 1
+            print(f"\r  đã render {da_luu}/{tong} khung", end="", flush=True)
+            continue
+        if dong.startswith("[s") and " render " in dong:  # "[s01] render 91 khung (...)"
+            n = int(dong.split(" render ")[1].split()[0])
+            tong = 1 if xem_thu else (n + 1) // 2 if on_twos else n
+        if da_luu:
+            print()
+            da_luu = 0
+        print(dong, flush=True)
+    if da_luu:
+        print()
+    if p.wait():
+        print("\n".join(cuoi))
+        sys.exit("Render lỗi, xem 40 dòng cuối ở trên (chạy lại với HIEN_HET=1 để xem toàn bộ).")
 
 
 def to_xem_thu(build, so_shot):

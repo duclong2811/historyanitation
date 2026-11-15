@@ -141,6 +141,8 @@ class Luoi:
 
     def tao(self, ten, vi_tri=(0, 0, 0), huong=0.0, cha=None, muot=False):
         bmesh.ops.remove_doubles(self.bm, verts=self.bm.verts, dist=1e-5)
+        # Bỏ mặt suy biến (trùng cạnh sau khi gộp điểm), tránh Blender in cảnh báo "edge appears twice"
+        bmesh.ops.dissolve_degenerate(self.bm, dist=1e-5, edges=self.bm.edges)
         bmesh.ops.recalc_face_normals(self.bm, faces=self.bm.faces)
         me = bpy.data.meshes.new(ten)
         self.bm.to_mesh(me)
