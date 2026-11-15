@@ -97,7 +97,8 @@ def lam_moi(data, ch):
 def anh_sang(gio):
     troi, nang, manh, cao, huong = GIO.get(gio, GIO["chieu"])
     w = bpy.data.worlds.new("troi")
-    w.use_nodes = True
+    if bpy.app.version < (5, 0, 0):  # từ Blender 5 world luôn dùng node
+        w.use_nodes = True
     bg = w.node_tree.nodes.get("Background")
     bg.inputs["Color"].default_value = t.mau_rgb(troi)
     bg.inputs["Strength"].default_value = 1.0
