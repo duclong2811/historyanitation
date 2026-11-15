@@ -1,0 +1,64 @@
+# Kịch bản mẫu. Chép file này thành kịch bản mới rồi sửa.
+# Chạy cả pipeline:  python pipeline/chay.py kich-ban/mau.yaml
+# Xem thử nhanh:     python pipeline/chay.py kich-ban/mau.yaml --xem-thu
+
+tieu_de: "Tập mẫu"
+
+# doc = 9:16 (1080x1920, TikTok/Reels) | ngang = 16:9 (1920x1080, YouTube)
+kho_hinh: doc
+fps: 30
+# true: render 15 hình/giây rồi nhân đôi lên 30 (nhanh gấp đôi, hợp phong cách hoạt hình)
+on_twos: true
+# Render nhỏ hơn rồi phóng lên khi ghép. 67 = render 720p cho video 1080p.
+ty_le_render: 67
+phu_de: true
+# Nhạc nền (tùy chọn), âm lượng 0..1
+nhac_nen: ""
+am_luong_nhac: 0.15
+
+giong:
+  # piper: máy tự đọc (offline, miễn phí) | tu_thu: bạn tự thu, đặt file vào giong/<tên kịch bản>/s01.wav, s02.wav...
+  cach: piper
+  mo_hinh: assets/giong/vi_VN-vais1000-medium.onnx
+  # Tốc độ đọc: 1.0 bình thường, >1 chậm hơn
+  toc_do: 1.15
+
+nhan_vat:
+  nguoi_ke:
+    ten: "Người kể"
+    # Mô hình .glb/.gltf/.fbx (VRoid xuất ra hoặc đã qua Mixamo). Để trống thì dùng hình nộm tạm.
+    mo_hinh: ""
+    mau: "#b5462f"
+  cau_be:
+    ten: "Cậu bé"
+    mo_hinh: ""
+    mau: "#2f6f8f"
+
+canh:
+  san_mau:
+    # Script Python dựng cảnh, nằm trong thư mục canh/
+    dung: canh/san_mau.py
+    # sang | trua | chieu | dem
+    gio: chieu
+
+# Mỗi lời thoại là một shot.
+#   camera: rong (toàn cảnh) | trung (ngang người) | can (cận mặt)
+#   hanh_dong: dung_yen | vay_tay | chi_tay | gat_dau, hoặc tên file Mixamo trong assets/dong_tac/
+loi:
+  - canh: san_mau
+    nhan_vat: nguoi_ke
+    noi: "Xin chào các bạn. Hôm nay chúng ta cùng nghe một câu chuyện."
+    camera: rong
+    hanh_dong: vay_tay
+
+  - canh: san_mau
+    nhan_vat: cau_be
+    noi: "Chuyện gì vậy ạ?"
+    camera: can
+    hanh_dong: gat_dau
+
+  - canh: san_mau
+    nhan_vat: nguoi_ke
+    noi: "Một câu chuyện về ngôi làng bên rặng tre."
+    camera: trung
+    hanh_dong: chi_tay

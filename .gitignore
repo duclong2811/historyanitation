@@ -9,3 +9,6 @@ output/
 *.mp4
 __pycache__/
 chars/
+# Giọng Piper (60MB), script tự tải lại khi cần
+assets/giong/*.onnx
+assets/giong/*.onnx.json

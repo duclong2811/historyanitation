@@ -4,13 +4,13 @@
 
 | Hướng | Mô tả | Trên GTX 1660 Super |
 |---|---|---|
-| A. 2.5D cắt giấy | Nhân vật PNG phẳng trong cảnh 3D (như `tham-khao/2.5D_scripts`) | Rất nhẹ |
+| A. 2.5D cắt giấy | Nhân vật PNG phẳng trong cảnh 3D | Rất nhẹ |
 | **B. 3D toon / anime** | VRoid Studio + Mixamo + Blender shader toon | **Tốt, hướng chính** |
 | C. AI chạy trên máy | ComfyUI + Stable Diffusion | Yếu: SD 1.5 ổn, SDXL chậm, video gần như không chạy nổi |
 
 Ước lượng render: khoảng 1–3 giây mỗi khung 1080p với Eevee. Video 1 phút render on twos mất khoảng 30–45 phút.
 
-So sánh nhân vật hiện tại với các nguồn miễn phí: ![so sánh](images/so_sanh_nhan_vat_canh.png)
+Ảnh mẫu từ các nguồn miễn phí: ![nguồn tài nguyên](images/nguon_tai_nguyen_mien_phi.png)
 
 ## 2. Nguồn tài nguyên miễn phí
 
