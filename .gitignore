@@ -1,0 +1,11 @@
+# Khóa API, không bao giờ commit
+.env
+# Đầu ra render và file tạm (nặng, tạo lại được)
+frames*/
+build/
+renders/
+output/
+*.blend1
+*.mp4
+__pycache__/
+chars/

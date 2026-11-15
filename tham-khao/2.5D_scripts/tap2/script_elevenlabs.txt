@@ -1,0 +1,21 @@
+[confident] Đây là cách tôi làm video hoạt hình 2.5D… [short pause] không vẽ tay, chỉ bằng code. [excited] Lưu lại để làm theo nhé!
+
+[short pause] Bước một: [short pause] voice. Tôi dùng ElevenLabs, chia thành từng câu ngắn, và thêm audio tag để giọng có cảm xúc.
+
+[short pause] Bước hai: [short pause] chạy Whisper để lấy mốc thời gian của từng chữ. [curious] Nhớ đọc lại… và sửa những chữ nó nghe sai.
+
+[short pause] Bước ba: [short pause] lên shot list. Mỗi ý một shot, khoảng hai giây. Cắt cảnh sớm hơn câu nói… một chút.
+
+[short pause] Bước bốn: [short pause] dựng set trong Blender bằng Python. [emphasized] Không kéo thả. Tôi nhờ AI viết script: khối hộp thành cái bàn, khối trụ thành cây đèn… [excited] ghép lại thành căn phòng!
+
+[short pause] Bước năm: [short pause] nhân vật. Vẽ bằng code ra ảnh PNG nền trong suốt, dán lên một tấm phẳng. Dùng vật liệu emission để đèn không làm bẩn màu. [mischievously] Thêm một vệt bóng mờ dưới chân… nhân vật sẽ đứng vững trên sàn.
+
+[short pause] Bước sáu: [short pause] ánh sáng. Một đèn ấm làm đèn chính. Một đèn trăng lạnh từ cửa sổ. Thêm volume cho khói bụi. [confident] Bật Freestyle để có nét viền như tranh vẽ.
+
+[short pause] Bước bảy: [short pause] camera. Mỗi shot một camera, đẩy vào… thật chậm. Gắn camera vào marker, Blender sẽ tự cắt cảnh.
+
+[short pause] Bước tám: [short pause] render bằng Eevee, tám sample. Máy yếu thì render on twos: mười lăm hình mỗi giây, nhân đôi lên ba mươi. [sighs] Laptop của tôi mất… hai tiếng.
+
+[short pause] Bước chín: [short pause] FFmpeg ghép hình với tiếng, đốt phụ đề một hai chữ, xuất khổ dọc chín mười sáu.
+
+[pause] [warmly] Chín bước. Không một nét vẽ tay. [excited] Comment chữ "code", tôi gửi bạn bộ script. [short pause] [warmly] Theo dõi để xem tập sau nhé!
