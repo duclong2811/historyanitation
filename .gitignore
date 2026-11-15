@@ -12,3 +12,5 @@ chars/
 # Giọng Piper (60MB), script tự tải lại khi cần
 assets/giong/*.onnx
 assets/giong/*.onnx.json
+# Bầu trời HDRI, script tự tải từ Poly Haven khi cần
+assets/hdri/

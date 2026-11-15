@@ -1,0 +1,78 @@
+# Nguyễn Ánh lấy lại Gia Định (1788).
+# Tư liệu và chỗ cần kiểm chứng: docs/boi-canh/gia-dinh-1788.md
+# Lời nhân vật là hư cấu để kể chuyện; lời người kể chỉ nêu mốc lịch sử.
+#
+#   python pipeline/chay.py kich-ban/gia_dinh_1788.yaml --xem-thu
+#   python pipeline/chay.py kich-ban/gia_dinh_1788.yaml
+
+tieu_de: "Nguyễn Ánh lấy lại Gia Định (1788)"
+kho_hinh: doc
+fps: 30
+on_twos: true
+ty_le_render: 67
+phu_de: true
+nhac_nen: ""
+am_luong_nhac: 0.15
+
+giong:
+  cach: piper
+  mo_hinh: assets/giong/vi_VN-vais1000-medium.onnx
+  toc_do: 1.15
+
+nhan_vat:
+  nguoi_ke:
+    ten: "Người kể"
+    an_hinh: true          # chỉ có giọng, không hiện hình
+  nguyen_anh:
+    ten: "Nguyễn Ánh"
+    mo_hinh: ""            # sau này: assets/nhan_vat/nguyen_anh.fbx
+    mau: "#5a2a2a"         # ⚠ tránh màu vàng: năm 1788 ông chưa lên ngôi
+    mau_quan: "#2a2420"
+    dau: khan_van
+    mau_khan: "#1f1a17"
+  linh_tay_son:
+    ten: "Lính Tây Sơn"
+    mo_hinh: ""
+    mau: "#7a2e24"
+    dau: non_dau
+    cam: giao
+
+canh:
+  song_gia_dinh:
+    dung: canh/gia_dinh_1788.py
+    gio: sang
+
+# camera: toan_canh | doan_thuyen | don_luy | choi_canh (camera đặt sẵn trong cảnh) hoặc rong | trung | can (theo người nói)
+# hanh_dong: dung_yen | vay_tay | chi_tay | gio_cao | gat_dau
+loi:
+  - canh: song_gia_dinh
+    nhan_vat: nguoi_ke
+    noi: "Năm Mậu Thân, 1788. Sông Bến Nghé mờ sương lúc rạng đông."
+    camera: toan_canh
+
+  - canh: song_gia_dinh
+    nhan_vat: nguoi_ke
+    noi: "Đoàn thuyền chiến của Nguyễn Ánh ngược dòng, tiến về Gia Định."
+    camera: doan_thuyen
+
+  - canh: song_gia_dinh
+    nhan_vat: nguyen_anh
+    noi: "Các tướng sĩ! Hôm nay ta lấy lại đất Gia Định."
+    camera: trung
+    hanh_dong: gio_cao
+
+  - canh: song_gia_dinh
+    nhan_vat: linh_tay_son
+    noi: "Thuyền quân Nguyễn tới rồi! Mau báo cho tướng quân!"
+    camera: choi_canh
+    hanh_dong: chi_tay
+
+  - canh: song_gia_dinh
+    nhan_vat: nguoi_ke
+    noi: "Tướng Tây Sơn trấn giữ Gia Định là Phạm Văn Tham không chống nổi, phải rút lui."
+    camera: don_luy
+
+  - canh: song_gia_dinh
+    nhan_vat: nguoi_ke
+    noi: "Hai năm sau, Nguyễn Ánh cho đắp thành Gia Định. Năm 1802, ông lên ngôi, lấy niên hiệu Gia Long."
+    camera: toan_canh

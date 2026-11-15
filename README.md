@@ -58,6 +58,25 @@ Lần đầu chạy, Piper tự tải giọng tiếng Việt (khoảng 60MB). S�
 | `docs/` | Ghi chú về hướng làm, nguồn tài nguyên, tối ưu, từ khóa tìm hiểu |
 | `build/`, `output/` | Đầu ra, không commit |
 
+## Kịch bản có sẵn
+
+| Kịch bản | Nội dung |
+|---|---|
+| `kich-ban/mau.yaml` | Mẫu ngắn để thử pipeline |
+| `kich-ban/gia_dinh_1788.yaml` | Nguyễn Ánh lấy lại Gia Định (1788). Tư liệu: `docs/boi-canh/gia-dinh-1788.md` |
+
+Xem thử vài shot cho nhanh:
+
+```bash
+python pipeline/chay.py kich-ban/gia_dinh_1788.yaml --xem-thu --chi s03,s04
+```
+
+Tùy chọn nhân vật trong kịch bản (khi chưa có mô hình thật):
+- `an_hinh: true`: chỉ có giọng (người kể), không hiện hình.
+- `dau`: `khan_van` | `non_dau` | `toc`. `cam`: `giao` | `co`. `mau`, `mau_quan`, `mau_khan`: màu áo, quần, khăn.
+
+Camera của shot là `rong` | `trung` | `can` (đặt theo người nói), hoặc tên một camera đặt sẵn trong script cảnh.
+
 ## Nhân vật thật thay cho hình nộm
 
 Chưa khai báo `mo_hinh` thì pipeline dùng hình nộm tạm để thử bố cục. Để dùng nhân vật thật:
@@ -72,7 +91,16 @@ Vì nhân vật và động tác cùng đi qua Mixamo nên tên xương khớp n
 
 ## Cảnh mới
 
-Chép `canh/san_mau.py` thành file mới, dùng các hàm trong `pipeline/blender_tien_ich.py` (`khoi`, `tru`, `cau`, `lang_tru_mai`, `ban_sao`) để dựng, rồi khai báo trong mục `canh` của kịch bản.
+Chép `canh/san_mau.py` hoặc `canh/gia_dinh_1788.py` thành file mới rồi khai báo trong mục `canh` của kịch bản. Các hàm dựng sẵn trong `pipeline/blender_tien_ich.py`:
+
+- Khối cơ bản: `khoi`, `tru`, `cau`, `lang_tru_mai`, `ban_sao` (nhân bản dùng chung lưới), `Luoi` (ghép nhiều khối nhiều màu thành một object).
+- Trời: `hdri` (tự tải bầu trời từ Poly Haven), `mat_troi`, `den_vien`, `suong`.
+- Cây: `dua_nuoc`, `cay_dua`, `bui_co`.
+- Công trình: `nha_la`, `choi_canh`, `coc_rao`, `hang_rao`, `co` (cờ bay).
+- Thuyền: `thuyen` (thân cong, mui, buồm cói, mắt thuyền, mái chèo), `dap_dinh` (bập bềnh).
+- Người: `nguoi` (áo, quần, khăn vấn hoặc nón dấu, giáo hoặc cờ).
+
+Hàm `dung(t)` của cảnh có thể trả về vị trí đứng của nhân vật (`cho_dung`, gắn được lên thuyền) và các camera đặt sẵn (`camera`). Xem ví dụ trong `canh/gia_dinh_1788.py`.
 
 ## Chia việc
 

@@ -6,6 +6,7 @@
 
 Tùy chọn khác:
     --may cpu   render bằng CPU (Cycles) khi máy không có GPU
+    --chi s01,s03  chỉ render các shot này (xem thử nhanh một vài shot)
 Blender: đặt biến môi trường BLENDER=đường/dẫn/blender.exe nếu chương trình không tự tìm thấy.
 """
 import glob
@@ -41,12 +42,14 @@ def tim_blender():
     sys.exit("Không tìm thấy Blender. Cài Blender 4.2+ hoặc đặt biến BLENDER=đường/dẫn/blender.exe")
 
 
-def render(shots, xem_thu, may):
+def render(shots, xem_thu, may, chi=None):
     cmd = tim_blender() + [str(HERE / "render_blender.py"), "--", str(shots)]
     if xem_thu:
         cmd.append("--xem-thu")
     if may:
         cmd += ["--may", may]
+    if chi:
+        cmd += ["--chi", chi]
     r = subprocess.run(cmd, cwd=GOC)
     if r.returncode:
         sys.exit("Render lỗi, xem thông báo ở trên.")
@@ -78,6 +81,7 @@ def main():
         sys.exit(__doc__)
     xem_thu, bo_giong = "--xem-thu" in a, "--bo-giong" in a
     may = a[a.index("--may") + 1] if "--may" in a else None
+    chi = a[a.index("--chi") + 1] if "--chi" in a else None
 
     import chia_shot
     import ghep_phim
@@ -87,7 +91,7 @@ def main():
     if not xem_thu and not bo_giong:
         giong_doc.tao(kb_path)
     shots = chia_shot.chia(kb_path)
-    render(shots, xem_thu, may)
+    render(shots, xem_thu, may, chi)
     if xem_thu:
         to_xem_thu(thu_muc_build(kb), len(kb["loi"]))
     else:

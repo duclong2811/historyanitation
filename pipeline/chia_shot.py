@@ -42,7 +42,8 @@ def chia(duong_dan_kb):
         # Nhân vật có mặt: mọi nhân vật từng nói trong cảnh này
         co_mat = []
         for l2 in kb["loi"]:
-            if l2["canh"] == l["canh"] and l2["nhan_vat"] not in co_mat:
+            an = kb["nhan_vat"][l2["nhan_vat"]].get("an_hinh", False)  # người kể giấu mặt
+            if l2["canh"] == l["canh"] and l2["nhan_vat"] not in co_mat and not an:
                 co_mat.append(l2["nhan_vat"])
         canh = kb["canh"][l["canh"]]
         s = {
@@ -66,6 +67,7 @@ def chia(duong_dan_kb):
         y["nv"] = {n: kb["nhan_vat"][n] for n in co_mat}
         y["nv_tep"] = {n: hash_tep(kb["nhan_vat"][n].get("mo_hinh", "")) for n in co_mat}
         y["render"] = [w, h, kb.get("ty_le_render", 100), kb.get("on_twos", True)]
+        y["code"] = [hash_tep("pipeline/render_blender.py"), hash_tep("pipeline/blender_tien_ich.py")]
         s["hash"] = hashlib.sha1(json.dumps(y, sort_keys=True).encode()).hexdigest()[:16]
         shots.append(s)
         t += so_frame / fps
