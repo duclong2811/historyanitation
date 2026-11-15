@@ -15,14 +15,15 @@ def doc_kich_ban(duong_dan):
     p = Path(duong_dan)
     kb = yaml.safe_load(p.read_text(encoding="utf-8"))
     kb["_ten"] = p.stem
-    for k in ("nhan_vat", "canh", "loi"):
+    anh_ai = kb.get("che_do") == "anh_ai"
+    for k in ("nhan_vat", "loi") if anh_ai else ("nhan_vat", "canh", "loi"):
         if not kb.get(k):
             sys.exit(f"Kịch bản thiếu mục '{k}'.")
     for i, l in enumerate(kb["loi"], 1):
-        for k in ("canh", "nhan_vat", "noi"):
+        for k in ("nhan_vat", "noi", "ve") if anh_ai else ("canh", "nhan_vat", "noi"):
             if not l.get(k):
                 sys.exit(f"Lời thứ {i} thiếu '{k}'.")
-        if l["canh"] not in kb["canh"]:
+        if not anh_ai and l["canh"] not in kb["canh"]:
             sys.exit(f"Lời thứ {i}: cảnh '{l['canh']}' chưa khai báo trong mục canh.")
         if l["nhan_vat"] not in kb["nhan_vat"]:
             sys.exit(f"Lời thứ {i}: nhân vật '{l['nhan_vat']}' chưa khai báo trong mục nhan_vat.")

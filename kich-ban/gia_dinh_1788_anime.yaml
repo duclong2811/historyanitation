@@ -1,0 +1,124 @@
+# Nguyễn Ánh lấy lại Gia Định (1788), bản ẢNH AI phong cách anime.
+# Mỗi shot: ComfyUI vẽ một ảnh từ prompt -> pipeline cho camera chuyển động + parallax -> ghép giọng, phụ đề.
+# Hướng dẫn cài ComfyUI và model: docs/anh-ai.md. Tư liệu lịch sử: docs/boi-canh/gia-dinh-1788.md
+#
+#   python pipeline/chay.py kich-ban/gia_dinh_1788_anime.yaml --xem-thu     # chỉ vẽ ảnh, xem trước
+#   python pipeline/chay.py kich-ban/gia_dinh_1788_anime.yaml               # làm cả phim
+#   python pipeline/chay.py kich-ban/gia_dinh_1788_anime.yaml --ve-lai s03  # vẽ lại shot chưa ưng
+#
+# Prompt viết bằng tiếng Anh (model hiểu tốt nhất). Mẹo:
+# - Model AI hay vẽ nhầm sang đồ Trung Quốc/Nhật, nên prompt mô tả cụ thể đồ Việt và mục "am" chặn đồ Trung/Nhật.
+# - Ảnh chưa đúng ý: sửa "ve" rồi chạy lại, hoặc --ve-lai để thử hạt giống khác.
+
+tieu_de: "Nguyễn Ánh lấy lại Gia Định (1788)"
+che_do: anh_ai
+kho_hinh: doc
+fps: 30
+phu_de: true
+nhac_nen: ""
+am_luong_nhac: 0.15
+
+giong:
+  # piper | tu_thu | viettts (xem docs/giong-viettts.md)
+  cach: piper
+  mo_hinh: assets/giong/vi_VN-vais1000-medium.onnx
+  toc_do: 1.15
+
+anh_ai:
+  may_chu: http://127.0.0.1:8188
+  mo_hinh: animagine-xl-4.0-opt.safetensors
+  rong: 832
+  cao: 1216
+  buoc: 28
+  cfg: 5
+  sampler: euler_ancestral
+  # Parallax theo độ sâu (cần torch + transformers, xem docs/anh-ai.md)
+  chieu_sau: true
+  # Chèn vào cuối mọi prompt
+  phong_cach: >-
+    anime screencap, detailed background, cinematic lighting, atmospheric perspective,
+    18th century vietnam, masterpiece, high score, great score, absurdres
+  # Chèn vào mọi negative prompt: chặn lỗi hình và đồ Trung/Nhật hay bị lẫn
+  phong_cach_am: >-
+    lowres, bad anatomy, bad hands, text, error, missing finger, extra digits, fewer digits, cropped,
+    worst quality, low quality, low score, bad score, average score, signature, watermark, username, blurry,
+    chinese architecture, pagoda, great wall, japanese, samurai, kimono, katana, hanfu, queue hairstyle,
+    pigtail, manchu, modern clothes, mountains, snow
+
+nhan_vat:
+  nguoi_ke:
+    ten: "Người kể"
+    an_hinh: true
+  nguyen_anh:
+    ten: "Nguyễn Ánh"
+    # Năm 1788 Nguyễn Ánh 26 tuổi, chưa lên ngôi: tránh màu vàng của vua
+    mo_ta: >-
+      1boy, young vietnamese lord, 26 years old, short black beard, sharp eyes, black hair tied up under
+      a dark wrapped turban, dark red long tunic with standing collar and side slits, black trousers,
+      sword at waist
+  linh_tay_son:
+    ten: "Lính Tây Sơn"
+    mo_ta: >-
+      1boy, vietnamese soldier, tan skin, wide conical hat with a metal spike on top, red short uniform tunic,
+      black trousers, holding a long spear
+
+# Mỗi lời thoại là một shot.
+#   ve: mô tả ảnh của shot (tiếng Anh). Mô tả nhân vật trên hình và phong cách được tự chèn thêm.
+#   tren_hinh: nhân vật có trên hình (mặc định là người nói, người kể thì không ai)
+#   chuyen_dong: day_vao | keo_ra | lia_trai | lia_phai | lia_len | lia_xuong | dung_yen (ghép bằng +)
+#   tieu_diem: [x, y] điểm camera hướng vào (0..1)
+#   am: negative prompt riêng của shot
+#   hat_giong: cố định hạt giống khi đã ưng ảnh
+loi:
+  - nhan_vat: nguoi_ke
+    noi: "Năm Mậu Thân, 1788. Sông Bến Nghé mờ sương lúc rạng đông."
+    ve: >-
+      no humans, scenery, wide shot, wide misty river at dawn in the mekong delta, dense nipa palms along
+      the muddy riverbank, tall coconut palms, flat lowland, distant wooden boats with battened sails,
+      golden sunrise glowing through fog, calm water reflections
+    chuyen_dong: day_vao
+    tieu_diem: [0.5, 0.55]
+
+  - nhan_vat: nguoi_ke
+    noi: "Đoàn thuyền chiến của Nguyễn Ánh ngược dòng, tiến về Gia Định."
+    ve: >-
+      fleet of wooden vietnamese war junks rowing upriver, brown battened sails, rows of oars, painted eyes
+      on the bow, many tiny soldiers wearing conical hats on deck, white flags, river, nipa palms on both
+      banks, morning mist, dynamic angle, from side
+    chuyen_dong: lia_phai
+    tieu_diem: [0.5, 0.5]
+
+  - nhan_vat: nguyen_anh
+    noi: "Các tướng sĩ! Hôm nay ta lấy lại đất Gia Định."
+    ve: >-
+      solo, upper body, determined expression, raising one fist, shouting, standing on the deck of a wooden
+      war junk, wind blowing, battened sails and soldiers with spears in background, river at sunrise,
+      from below
+    chuyen_dong: day_vao
+    tieu_diem: [0.5, 0.35]
+
+  - nhan_vat: linh_tay_son
+    noi: "Thuyền quân Nguyễn tới rồi! Mau báo cho tướng quân!"
+    ve: >-
+      solo, upper body, alarmed, open mouth, shouting, pointing forward, standing in a bamboo watchtower
+      with thatched roof, sharpened wooden palisade below, red flags, river with distant sails behind,
+      morning light
+    chuyen_dong: dung_yen+lia_len
+    tieu_diem: [0.5, 0.35]
+
+  - nhan_vat: nguoi_ke
+    noi: "Tướng Tây Sơn trấn giữ Gia Định là Phạm Văn Tham không chống nổi, phải rút lui."
+    ve: >-
+      no humans, scenery, riverside earthen fort with a sharpened wooden palisade, bamboo watchtowers,
+      thatched huts, red flags, coconut palms, smoke rising, war junks with sails approaching on the river,
+      morning, wide shot
+    chuyen_dong: keo_ra
+    tieu_diem: [0.5, 0.5]
+
+  - nhan_vat: nguoi_ke
+    noi: "Hai năm sau, Nguyễn Ánh cho đắp thành Gia Định. Năm 1802, ông lên ngôi, lấy niên hiệu Gia Long."
+    ve: >-
+      no humans, scenery, panoramic view, wide river at golden hour, fleet of wooden junks with sails
+      anchored near the bank, coconut palms, flock of birds, warm orange sky, peaceful, victorious mood
+    chuyen_dong: keo_ra+lia_trai
+    tieu_diem: [0.5, 0.5]

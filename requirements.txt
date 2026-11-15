@@ -1,3 +1,4 @@
 pyyaml
 piper-tts
 pillow
+opencv-python-headless

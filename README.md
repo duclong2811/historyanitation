@@ -4,8 +4,15 @@ Làm phim hoạt hình hoàn toàn bằng công cụ miễn phí, chạy trên m
 **Blender + Python + FFmpeg + Piper TTS**. Máy mục tiêu: GTX 1660 Super (6GB VRAM).
 
 ```
-Kịch bản (YAML) ──► Giọng đọc ──► Chia shot ──► Render từng shot (Blender) ──► Ghép phim (FFmpeg)
+Kịch bản (YAML) ──► Giọng đọc ──► Chia shot ──► Hình từng shot ──► Ghép phim (FFmpeg)
 ```
+
+Có hai chế độ làm hình:
+
+| Chế độ | Cách làm hình | Hợp với |
+|---|---|---|
+| **Ảnh AI** (`che_do: anh_ai`) | ComfyUI vẽ ảnh anime chi tiết từ prompt từng shot, pipeline cho camera chuyển động + parallax 2.5D | Hình đẹp, chi tiết kiểu anime. Xem `docs/anh-ai.md` |
+| **Blender** (mặc định) | Dựng cảnh 3D bằng code, render từng shot | Nhân vật cử động tự do, nhất quán tuyệt đối |
 
 ## Cài đặt (một lần)
 
@@ -63,7 +70,8 @@ Lần đầu chạy, Piper tự tải giọng tiếng Việt (khoảng 60MB). S�
 | Kịch bản | Nội dung |
 |---|---|
 | `kich-ban/mau.yaml` | Mẫu ngắn để thử pipeline |
-| `kich-ban/gia_dinh_1788.yaml` | Nguyễn Ánh lấy lại Gia Định (1788). Tư liệu: `docs/boi-canh/gia-dinh-1788.md` |
+| `kich-ban/gia_dinh_1788.yaml` | Nguyễn Ánh lấy lại Gia Định (1788), bản Blender. Tư liệu: `docs/boi-canh/gia-dinh-1788.md` |
+| `kich-ban/gia_dinh_1788_anime.yaml` | Cùng câu chuyện, bản ảnh AI anime (cần ComfyUI, xem `docs/anh-ai.md`) |
 
 Xem thử vài shot cho nhanh:
 

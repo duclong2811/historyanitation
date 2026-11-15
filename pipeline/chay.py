@@ -4,6 +4,8 @@
     python pipeline/chay.py kich-ban/mau.yaml --xem-thu    # mỗi shot 1 ảnh nhỏ -> build/mau/xem_thu.png
     python pipeline/chay.py kich-ban/mau.yaml --bo-giong   # giữ giọng đã tạo, không đọc lại
 
+Chế độ ảnh AI (che_do: anh_ai): --xem-thu chỉ vẽ ảnh rồi dừng; --ve-lai s02,s05 vẽ lại với hạt giống mới.
+
 Tùy chọn khác:
     --may cpu   render bằng CPU (Cycles) khi máy không có GPU
     --chi s01,s03  chỉ render các shot này (xem thử nhanh một vài shot)
@@ -87,15 +89,17 @@ def render(shots, xem_thu, may, chi=None):
         sys.exit("Render lỗi, xem 40 dòng cuối ở trên (chạy lại với HIEN_HET=1 để xem toàn bộ).")
 
 
-def to_xem_thu(build, so_shot):
+def to_xem_thu(build, so_shot, thu_muc="xem_thu"):
     build = Path(build).resolve()
-    anh = sorted((build / "xem_thu").glob("s*.png"))[:so_shot]
+    anh = sorted(p for p in (build / thu_muc).glob("s*.png") if "_" not in p.stem)[:so_shot]
     try:
         from PIL import Image
     except ImportError:
         print(f"Ảnh xem thử nằm trong {(build / 'xem_thu').relative_to(GOC)}")
         return
     ims = [Image.open(a).convert("RGB") for a in anh]
+    if ims[0].width > 600:  # ảnh AI lớn: thu nhỏ cho bảng xem thử
+        ims = [im.resize((600, round(im.height * 600 / im.width))) for im in ims]
     w, h = ims[0].size
     cot = min(len(ims), 4)
     hang = (len(ims) + cot - 1) // cot
@@ -123,11 +127,21 @@ def main():
     if not xem_thu and not bo_giong:
         giong_doc.tao(kb_path)
     shots = chia_shot.chia(kb_path)
-    render(shots, xem_thu, may, chi)
-    if xem_thu:
-        to_xem_thu(thu_muc_build(kb), len(kb["loi"]))
+    if kb.get("che_do") == "anh_ai":
+        import chuyen_dong
+        import tao_anh
+        ve_lai = a[a.index("--ve-lai") + 1].split(",") if "--ve-lai" in a else ()
+        tao_anh.tao(shots, chi.split(",") if chi else None, ve_lai)
+        if xem_thu:
+            to_xem_thu(thu_muc_build(kb), len(kb["loi"]), thu_muc="anh")
+            return
+        chuyen_dong.tao(shots, chi.split(",") if chi else None)
     else:
-        ghep_phim.ghep(shots)
+        render(shots, xem_thu, may, chi)
+        if xem_thu:
+            to_xem_thu(thu_muc_build(kb), len(kb["loi"]))
+            return
+    ghep_phim.ghep(shots)
 
 
 if __name__ == "__main__":
