@@ -11,6 +11,8 @@ fps: 30
 on_twos: true
 ty_le_render: 67
 phu_de: true
+# Nét viền: freestyle (đẹp, chạy bằng CPU nên chậm) | tat (không nét viền, nhanh nhất)
+net_vien: freestyle
 nhac_nen: ""
 am_luong_nhac: 0.15
 

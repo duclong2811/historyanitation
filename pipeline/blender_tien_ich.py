@@ -321,7 +321,7 @@ def dua_nuoc(ten="dua_nuoc", mau="#5f8a3a", so_la=11, seed=1):
     for i in range(so_la):
         _la_dai(l, (rnd.uniform(-0.2, 0.2), rnd.uniform(-0.2, 0.2), 0), rnd.uniform(0, math.tau),
                 rnd.uniform(3.5, 5.0), 0.5, math.radians(rnd.uniform(48, 72)), rnd.uniform(0.25, 0.45), mau)
-    return l.tao(ten)
+    return _khong_net(l.tao(ten))
 
 
 def cay_dua(ten="cay_dua", cao=8.0, mau_than="#8a7458", mau_la="#4e7d32", so_la=12, seed=2):
@@ -339,7 +339,7 @@ def cay_dua(ten="cay_dua", cao=8.0, mau_than="#8a7458", mau_la="#4e7d32", so_la=
         _la_dai(l, dinh, i / so_la * math.tau + rnd.uniform(-0.2, 0.2), rnd.uniform(3.2, 4.2), 0.7,
                 math.radians(rnd.uniform(15, 40)), rnd.uniform(0.35, 0.55), mau_la)
     l.cau(0.35, dinh, mau_la)
-    return l.tao(ten)
+    return _khong_net(l.tao(ten))
 
 
 def bui_co(ten="bui_co", mau="#7f9a4a", seed=3):
@@ -349,7 +349,13 @@ def bui_co(ten="bui_co", mau="#7f9a4a", seed=3):
     for i in range(9):
         _la_dai(l, (rnd.uniform(-0.15, 0.15), rnd.uniform(-0.15, 0.15), 0), rnd.uniform(0, math.tau),
                 rnd.uniform(0.8, 1.3), 0.08, math.radians(rnd.uniform(60, 80)), 0.2, mau, doan=4)
-    return l.tao(ten)
+    return _khong_net(l.tao(ten))
+
+
+def _khong_net(ob):
+    """Đánh dấu object không vẽ nét viền (bản sao bằng ban_sao giữ luôn dấu này)."""
+    ob["khong_net"] = True
+    return ob
 
 
 # ---------------- Công trình ----------------

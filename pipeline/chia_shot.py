@@ -66,7 +66,7 @@ def chia(duong_dan_kb):
         y["canh_tep"] = hash_tep(canh.get("dung", ""))
         y["nv"] = {n: kb["nhan_vat"][n] for n in co_mat}
         y["nv_tep"] = {n: hash_tep(kb["nhan_vat"][n].get("mo_hinh", "")) for n in co_mat}
-        y["render"] = [w, h, kb.get("ty_le_render", 100), kb.get("on_twos", True)]
+        y["render"] = [w, h, kb.get("ty_le_render", 100), kb.get("on_twos", True), kb.get("net_vien", "freestyle")]
         y["code"] = [hash_tep("pipeline/render_blender.py"), hash_tep("pipeline/blender_tien_ich.py")]
         s["hash"] = hashlib.sha1(json.dumps(y, sort_keys=True).encode()).hexdigest()[:16]
         shots.append(s)
@@ -80,6 +80,7 @@ def chia(duong_dan_kb):
         "on_twos": bool(kb.get("on_twos", True)),
         "ty_le_render": int(kb.get("ty_le_render", 100)),
         "phu_de": bool(kb.get("phu_de", True)),
+        "net_vien": kb.get("net_vien", "freestyle"),
         "nhac_nen": kb.get("nhac_nen", ""),
         "am_luong_nhac": float(kb.get("am_luong_nhac", 0.15)),
         "nhan_vat": kb["nhan_vat"],

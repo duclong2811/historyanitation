@@ -18,6 +18,7 @@ import importlib.util
 import json
 import math
 import sys
+import time
 from pathlib import Path
 
 import bpy
@@ -347,6 +348,24 @@ def dat_camera(data, shot, info, nv):
     tao_camera(p_dau, p_cuoi, nhin, tieu_cu)
 
 
+def loc_net_vien(sc, che_do):
+    """Freestyle chạy bằng CPU và rất chậm với cây cối nhiều lá: bỏ nét viền ở object có dấu khong_net.
+    che_do: freestyle (mặc định) | tat (không nét viền, nhanh nhất)."""
+    if che_do == "tat":
+        sc.render.use_freestyle = False
+        return
+    bo = bpy.data.collections.new("khong_net")
+    sc.collection.children.link(bo)
+    for o in list(sc.collection.objects):
+        if o.get("khong_net"):
+            bo.objects.link(o)
+            sc.collection.objects.unlink(o)
+    lset = bpy.context.view_layer.freestyle_settings.linesets[0]
+    lset.select_by_collection = True
+    lset.collection = bo
+    lset.collection_negation = "EXCLUSIVE"
+
+
 def render_shot(data, shot, ch, build):
     sc = lam_moi(data, shot, ch)
     cfg = data["canh"][shot["canh"]]
@@ -354,6 +373,7 @@ def render_shot(data, shot, ch, build):
     info = dung_canh(cfg)
     nv = dat_nhan_vat(data, shot, info)
     dat_camera(data, shot, info, nv)
+    loc_net_vien(sc, data.get("net_vien", "freestyle"))
     sc.frame_start, sc.frame_end = 1, shot["so_frame"]
     if ch["xem_thu"]:
         out = build / "xem_thu"
@@ -386,8 +406,12 @@ def main():
         if not ch["xem_thu"] and h.exists() and h.read_text() == shot["hash"]:
             print(f"[{shot['id']}] không đổi, bỏ qua")
             continue
-        print(f"[{shot['id']}] render {shot['so_frame']} khung ({shot['camera']}, {shot['nhan_vat']})")
+        print(f"[{shot['id']}] render {shot['so_frame']} khung ({shot['camera']}, {shot['nhan_vat']})", flush=True)
+        t0 = time.time()
         render_shot(data, shot, ch, build)
+        n = 1 if ch["xem_thu"] else (shot["so_frame"] + 1) // 2 if data["on_twos"] else shot["so_frame"]
+        dt = time.time() - t0
+        print(f"[{shot['id']}] xong trong {dt:.0f} giây, trung bình {dt / n:.1f} giây/khung", flush=True)
 
 
 if __name__ == "__main__":
