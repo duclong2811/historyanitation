@@ -17,6 +17,7 @@ nhac_nen: ""
 am_luong_nhac: 0.15
 
 giong:
+  # piper (mặc định) | tu_thu | viettts (giọng tự nhiên hơn, không dùng thương mại: xem docs/giong-viettts.md)
   cach: piper
   mo_hinh: assets/giong/vi_VN-vais1000-medium.onnx
   toc_do: 1.15

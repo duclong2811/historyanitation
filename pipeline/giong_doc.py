@@ -2,12 +2,18 @@
 
   cach: piper   -> Piper TTS đọc offline, miễn phí. Tự tải giọng tiếng Việt nếu chưa có.
   cach: tu_thu  -> lấy file bạn tự thu: giong/<tên kịch bản>/s01.wav (hoặc .mp3/.m4a), s02...
+  cach: viettts -> VietTTS (github.com/dangvansam/viet-tts) chạy trên máy bạn, giọng tự nhiên hơn,
+                   mỗi nhân vật một giọng, nhân bản được giọng từ file mẫu. Cần bật server trước
+                   (xem docs/giong-viettts.md). Model của VietTTS KHÔNG được dùng thương mại (CC BY-NC).
 
     python pipeline/giong_doc.py kich-ban/mau.yaml
 """
+import json
 import shutil
 import subprocess
+import uuid
 import sys
+import urllib.error
 import urllib.request
 import wave
 from pathlib import Path
@@ -56,6 +62,48 @@ def doc_piper(kb, out):
         print(f"  {dich.name}: {l['noi'][:50]}")
 
 
+def _goi_viettts(url, du_lieu, kieu):
+    req = urllib.request.Request(url, data=du_lieu, method="POST", headers={
+        "Content-Type": kieu, "Authorization": "Bearer viet-tts"})
+    try:
+        with urllib.request.urlopen(req, timeout=600) as r:
+            return r.read()
+    except urllib.error.HTTPError as e:
+        sys.exit(f"VietTTS báo lỗi {e.code}: {e.read().decode('utf-8', 'replace')[:300]}")
+    except urllib.error.URLError as e:
+        sys.exit(f"Không kết nối được VietTTS ở {url} ({e.reason}).\n"
+                 "Bật server trước: xem docs/giong-viettts.md (docker compose up -d trong thư mục viet-tts).")
+
+
+def doc_viettts(kb, out):
+    """Mỗi nhân vật đọc bằng giọng riêng: nhan_vat.<tên>.giong = tên giọng có sẵn (vd speechify_3)
+    hoặc đường dẫn file mẫu (vd giong/mau/toi.wav) để nhân bản giọng."""
+    cfg = kb.get("giong", {})
+    may_chu = cfg.get("may_chu", "http://localhost:8298").rstrip("/")
+    mac_dinh = cfg.get("giong_mac_dinh", "speechify_10")
+    toc_do = 1.0 / float(cfg.get("toc_do", 1.0))  # toc_do > 1 là chậm hơn, VietTTS dùng speed > 1 là nhanh hơn
+    for i, l in enumerate(kb["loi"], 1):
+        giong = kb["nhan_vat"][l["nhan_vat"]].get("giong") or mac_dinh
+        tep_mau = GOC / giong
+        if tep_mau.is_file():  # nhân bản giọng từ file mẫu
+            ranh = uuid.uuid4().hex
+            phan = [f'--{ranh}\r\nContent-Disposition: form-data; name="text"\r\n\r\n{l["noi"]}\r\n'.encode(),
+                    (f'--{ranh}\r\nContent-Disposition: form-data; name="audio_file"; filename="{tep_mau.name}"\r\n'
+                     "Content-Type: application/octet-stream\r\n\r\n").encode(),
+                    tep_mau.read_bytes(), f"\r\n--{ranh}--\r\n".encode()]
+            am = _goi_viettts(f"{may_chu}/v1/tts", b"".join(phan), f"multipart/form-data; boundary={ranh}")
+        else:
+            body = json.dumps({"model": "tts-1", "input": l["noi"], "voice": giong, "speed": toc_do,
+                               "response_format": "wav"}).encode("utf-8")
+            am = _goi_viettts(f"{may_chu}/v1/audio/speech", body, "application/json")
+        tam = out / f"{ma_shot(i)}_tho.wav"
+        tam.write_bytes(am)
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(tam), "-ac", "1", "-ar", "44100",
+                        str(out / f"{ma_shot(i)}.wav")], check=True)
+        tam.unlink()
+        print(f"  {ma_shot(i)}.wav [{giong}]: {l['noi'][:50]}")
+
+
 def lay_tu_thu(kb, out):
     nguon = GOC / "giong" / kb["_ten"]
     thieu = []
@@ -81,6 +129,8 @@ def tao(duong_dan_kb):
     print(f"Giọng đọc ({cach}):")
     if cach == "tu_thu":
         lay_tu_thu(kb, out)
+    elif cach == "viettts":
+        doc_viettts(kb, out)
     else:
         doc_piper(kb, out)
 

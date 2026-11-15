@@ -40,7 +40,7 @@ Lần đầu chạy, Piper tự tải giọng tiếng Việt (khoảng 60MB). S�
 | Bước | File | Việc |
 |---|---|---|
 | 1. Kịch bản | `kich-ban/*.yaml` | Nhân vật, cảnh, lời thoại, camera, động tác. Xem chú thích trong `kich-ban/mau.yaml` |
-| 2. Giọng đọc | `pipeline/giong_doc.py` | Piper đọc offline, hoặc dùng file tự thu trong `giong/<tên kịch bản>/s01.wav`... |
+| 2. Giọng đọc | `pipeline/giong_doc.py` | Piper đọc offline; VietTTS (giọng tự nhiên, mỗi nhân vật một giọng, xem `docs/giong-viettts.md`); hoặc file tự thu trong `giong/<tên kịch bản>/s01.wav`... |
 | 3. Chia shot | `pipeline/chia_shot.py` | Mỗi lời thoại một shot, thời lượng theo giọng đọc -> `build/<tên>/shots.json` |
 | 4. Render | `pipeline/render_blender.py` | Dựng cảnh, đặt nhân vật, camera đẩy chậm, shader toon, nét viền Freestyle, render on twos |
 | 5. Ghép phim | `pipeline/ghep_phim.py` | Phóng lên 1080p, ghép tiếng, phụ đề, nhạc nền, mã hóa NVENC |
