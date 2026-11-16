@@ -9,6 +9,7 @@
 # Prompt viết bằng tiếng Anh (model hiểu tốt nhất). Mẹo:
 # - Model AI hay vẽ nhầm sang đồ Trung Quốc/Nhật, nên prompt mô tả cụ thể đồ Việt và mục "am" chặn đồ Trung/Nhật.
 # - Ảnh chưa đúng ý: sửa "ve" rồi chạy lại, hoặc --ve-lai để thử hạt giống khác.
+# - Nhấn mạnh một chi tiết: (dark red long tunic:1.3). Số càng lớn càng được chú ý (thường 1.1 đến 1.4).
 
 tieu_de: "Nguyễn Ánh lấy lại Gia Định (1788)"
 che_do: anh_ai
@@ -43,7 +44,7 @@ anh_ai:
     lowres, bad anatomy, bad hands, text, error, missing finger, extra digits, fewer digits, cropped,
     worst quality, low quality, low score, bad score, average score, signature, watermark, username, blurry,
     chinese architecture, pagoda, great wall, japanese, samurai, kimono, katana, hanfu, queue hairstyle,
-    pigtail, manchu, modern clothes, mountains, snow
+    pigtail, manchu, modern clothes, mountains, snow, glowing eyes, bandana
 
 nhan_vat:
   nguoi_ke:
@@ -54,8 +55,8 @@ nhan_vat:
     # Năm 1788 Nguyễn Ánh 26 tuổi, chưa lên ngôi: tránh màu vàng của vua
     mo_ta: >-
       1boy, young vietnamese lord, 26 years old, short black beard, sharp eyes, black hair tied up under
-      a dark wrapped turban, dark red long tunic with standing collar and side slits, black trousers,
-      sword at waist
+      a (black wrapped turban:1.2), (dark red long tunic:1.3) with standing collar and side slits,
+      black trousers, sword at waist
   linh_tay_son:
     ten: "Lính Tây Sơn"
     mo_ta: >-

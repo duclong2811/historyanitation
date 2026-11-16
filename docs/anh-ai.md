@@ -8,7 +8,9 @@ chế độ Blender. Miễn phí, không cần API, chạy được trên GTX 16
 Kịch bản (prompt từng shot) ──► ComfyUI vẽ ảnh ──► Chuyển động 2.5D ──► Ghép giọng, phụ đề ──► Phim
 ```
 
-Ví dụ: `kich-ban/gia_dinh_1788_anime.yaml`.
+Ví dụ: `kich-ban/gia_dinh_1788_anime.yaml`. Ảnh thật của shot 3 (Animagine XL 4.0, chưa chỉnh prompt):
+
+![Nguyễn Ánh trên thuyền chiến](images/anh_ai_s03_mau.jpg)
 
 ## Cài đặt (một lần)
 

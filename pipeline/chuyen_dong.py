@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from chung import GOC, doc_json
 
 Z_MAX = 1.16          # mức phóng lớn nhất
-PARALLAX = 0.06       # độ mạnh parallax (tỉ lệ khung hình)
+PARALLAX = 0.045      # độ mạnh parallax (tỉ lệ khung hình)
 _MO_HINH_SAU = None
 
 
@@ -118,8 +118,8 @@ def lam_shot(anh_path, do_sau, s, W, H, out):
         # Tâm khung trong ảnh lớn: hướng về tiêu điểm, cộng phần lia, rồi kẹp để không lộ mép ảnh
         cx = np.clip(fx * Bw + ox * (Bw - 2 * hw), hw, Bw - hw)
         cy = np.clip(fy * Bh + oy * (Bh - 2 * hh), hh, Bh - hh)
-        mx = cx + xs * k
-        my = cy + ys * k
+        mx = (cx + xs * k).astype(np.float32)
+        my = (cy + ys * k).astype(np.float32)
         if D is not None:
             d = cv2.remap(D, mx, my, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT) - dm
             p = PARALLAX * pu

@@ -36,7 +36,9 @@ def workflow_mac_dinh(a):
             "seed": a["hat_giong"], "steps": a["buoc"], "cfg": a["cfg"], "sampler_name": a["sampler"],
             "scheduler": a["scheduler"], "denoise": 1.0, "model": ["4", 0], "positive": ["6", 0],
             "negative": ["7", 0], "latent_image": ["5", 0]}},
-        "8": {"class_type": "VAEDecode", "inputs": {"samples": ["3", 0], "vae": ["4", 2]}},
+        # Giải mã ảnh theo ô 512px: tốn ít bộ nhớ hơn nhiều, hợp với card 6GB
+        "8": {"class_type": "VAEDecodeTiled", "inputs": {"samples": ["3", 0], "vae": ["4", 2], "tile_size": 512,
+                                                          "overlap": 64, "temporal_size": 64, "temporal_overlap": 8}},
         "9": {"class_type": "SaveImage", "inputs": {"filename_prefix": "historyanitation", "images": ["8", 0]}},
     }
 
