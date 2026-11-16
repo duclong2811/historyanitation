@@ -66,6 +66,7 @@ def shot_anh_ai(kb, l, sid, w, h):
            "rong": cfg.get("rong", 832), "cao": cfg.get("cao", 1216), "buoc": cfg.get("buoc", 28),
            "cfg": cfg.get("cfg", 5.0), "sampler": cfg.get("sampler", "euler_ancestral"),
            "scheduler": cfg.get("scheduler", "normal"), "workflow": cfg.get("workflow", ""),
+           "phong_to": cfg.get("phong_to", ""), "he_so_phong": cfg.get("he_so_phong", 2.0),
            "workflow_tep": hash_tep(cfg.get("workflow", ""))}
     s = {"tren_hinh": tren_hinh, "chuyen_dong": l.get("chuyen_dong", "day_vao"),
          "tieu_diem": l.get("tieu_diem", [0.5, 0.45]), "anh": anh, "hash_anh": _hash(anh)}

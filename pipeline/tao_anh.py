@@ -26,8 +26,8 @@ AM_MAC_DINH = ("lowres, bad anatomy, bad hands, text, error, missing finger, ext
 
 
 def workflow_mac_dinh(a):
-    """Workflow txt2img chuẩn của ComfyUI (định dạng API)."""
-    return {
+    """Workflow txt2img chuẩn của ComfyUI (định dạng API), kèm phóng to nếu có anh_ai.phong_to."""
+    wf = {
         "4": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": a["mo_hinh"]}},
         "5": {"class_type": "EmptyLatentImage", "inputs": {"width": a["rong"], "height": a["cao"], "batch_size": 1}},
         "6": {"class_type": "CLIPTextEncode", "inputs": {"text": a["prompt"], "clip": ["4", 1]}},
@@ -40,6 +40,21 @@ def workflow_mac_dinh(a):
         "8": {"class_type": "VAEDecodeTiled", "inputs": {"samples": ["3", 0], "vae": ["4", 2], "tile_size": 512,
                                                           "overlap": 64, "temporal_size": 64, "temporal_overlap": 8}},
         "9": {"class_type": "SaveImage", "inputs": {"filename_prefix": "historyanitation", "images": ["8", 0]}},
+    }
+    if a.get("phong_to"):
+        wf.update(chuoi_phong_to(a, ["8", 0]))
+        wf["9"]["inputs"]["images"] = ["12", 0]
+    return wf
+
+
+def chuoi_phong_to(a, anh_vao):
+    """Vẽ nhỏ cho nhanh rồi phóng to bằng AI (Real-ESRGAN anime x4), sau đó thu về đúng hệ số mong muốn.
+    Chỉ phóng ảnh tĩnh của từng shot (vài ảnh), không phải từng khung video, nên rất nhanh."""
+    return {
+        "10": {"class_type": "UpscaleModelLoader", "inputs": {"model_name": a["phong_to"]}},
+        "11": {"class_type": "ImageUpscaleWithModel", "inputs": {"upscale_model": ["10", 0], "image": anh_vao}},
+        "12": {"class_type": "ImageScaleBy", "inputs": {"image": ["11", 0], "upscale_method": "lanczos",
+                                                        "scale_by": float(a.get("he_so_phong", 2.0)) / 4.0}},
     }
 
 
@@ -67,6 +82,9 @@ class ComfyUI:
                 return r.read()
         except urllib.error.HTTPError as e:
             noi_dung = e.read().decode("utf-8", "replace")
+            if "model_name" in noi_dung and "value_not_in_list" in noi_dung:
+                sys.exit("ComfyUI không thấy model phóng to. Tải RealESRGAN_x4plus_anime_6B.pth vào "
+                         "ComfyUI\\models\\upscale_models (xem docs/anh-ai.md) hoặc bỏ anh_ai.phong_to.")
             if "ckpt_name" in noi_dung or "value_not_in_list" in noi_dung:
                 sys.exit(f"ComfyUI không thấy model. Model đang có: {self.danh_sach_model()}\n"
                          f"Sửa anh_ai.mo_hinh trong kịch bản cho khớp. Chi tiết: {noi_dung[:400]}")

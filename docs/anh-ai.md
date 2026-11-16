@@ -30,7 +30,14 @@ https://huggingface.co/cagliostrolab/animagine-xl-4.0/resolve/main/animagine-xl-
 Đặt vào `C:\ComfyUI_windows_portable\ComfyUI\models\checkpoints\`. Giấy phép: OpenRAIL++
 (dùng ảnh thương mại được, nhưng có danh sách điều cấm, nên đọc trên trang model).
 
-### 3. Thư viện cho pipeline
+### 3. Model phóng to ảnh (Real-ESRGAN anime)
+
+Ảnh được vẽ nhỏ cho nhanh rồi phóng to bằng AI. Tải file (khoảng 18MB):
+https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth
+
+Đặt vào `C:\ComfyUI_windows_portable\ComfyUI\models\upscale_models\`. Giấy phép BSD-3.
+
+### 4. Thư viện cho pipeline
 
 ```powershell
 pip install -r requirements.txt
@@ -83,6 +90,22 @@ python pipeline/chay.py kich-ban/gia_dinh_1788_anime.yaml
 - `chuyen_dong` nên hợp với ảnh: cảnh rộng dùng `day_vao` hoặc `keo_ra`; ảnh ngang có nhiều thứ dùng `lia_trai` hoặc
   `lia_phai`; cận mặt dùng `day_vao` với `tieu_diem` đặt vào mặt.
 
+## Tốc độ và chất lượng
+
+Pipeline **vẽ ảnh nhỏ rồi phóng to bằng AI**. Chỉ phóng ảnh tĩnh của từng shot (6 ảnh), không phải từng khung
+video (khoảng 600 khung), nên phần phóng to gần như không tốn thời gian mà video vẫn nét 1080p.
+
+Chọn mức trong `anh_ai` của kịch bản:
+
+| Mức | `rong` × `cao` | `buoc` | Ghi chú |
+|---|---|---|---|
+| nhanh | 576 × 1024 | 18 | Nhanh nhất, chi tiết nhỏ (mặt người ở xa) dễ bị méo |
+| **vừa** (mặc định) | 640 × 1120 | 22 | Cân bằng, phóng ×2 ra 1280 × 2240 |
+| đẹp | 768 × 1344 | 28 | Chuẩn của model SDXL, chậm gấp khoảng 1,8 lần mức vừa |
+
+Cách làm gợi ý: dùng **nhanh** khi đang thử prompt, ưng rồi thì chuyển **vừa** hoặc **đẹp** để làm bản cuối.
+Đổi mức thì ảnh được vẽ lại (có thể khác đôi chút vì kích thước khác).
+
 ## Giới hạn cần biết
 
 - **Nhân vật giữa các shot chưa giống hệt nhau.** Cùng mô tả thì quần áo, màu sắc gần giống, nhưng khuôn
@@ -98,7 +121,8 @@ python pipeline/chay.py kich-ban/gia_dinh_1788_anime.yaml
 | `Không kết nối được ComfyUI` | Chưa mở `run_nvidia_gpu.bat`, hoặc ComfyUI chạy ở cổng khác (sửa `anh_ai.may_chu`) |
 | `ComfyUI không thấy model` | Tên file trong `anh_ai.mo_hinh` phải khớp đúng tên file trong `models\checkpoints` |
 | Ảnh đen hoặc toàn nhiễu | Dòng GTX 16xx đôi khi lỗi với fp16. Sửa `run_nvidia_gpu.bat`, thêm `--force-fp32` vào cuối dòng lệnh |
-| Hết VRAM (out of memory) | Thêm `--lowvram` vào cuối dòng lệnh trong `run_nvidia_gpu.bat` |
+| Hết VRAM (out of memory) | Thêm `--lowvram` vào cuối dòng lệnh trong `run_nvidia_gpu.bat`, hoặc hạ xuống mức **nhanh** |
+| `ComfyUI không thấy model phóng to` | Chưa tải `RealESRGAN_x4plus_anime_6B.pth` vào `models\upscale_models`, hoặc để `phong_to: ""` để bỏ phóng to |
 
 ## Workflow riêng (nâng cao)
 

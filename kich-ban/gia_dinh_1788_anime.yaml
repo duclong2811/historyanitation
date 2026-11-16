@@ -28,9 +28,14 @@ giong:
 anh_ai:
   may_chu: http://127.0.0.1:8188
   mo_hinh: animagine-xl-4.0-opt.safetensors
-  rong: 832
-  cao: 1216
-  buoc: 28
+  # Vẽ nhỏ cho nhanh rồi phóng to bằng AI. Chọn một mức:
+  #   nhanh: 576 x 1024, 18 bước    vừa: 640 x 1120, 22 bước    đẹp: 768 x 1344, 28 bước
+  rong: 640
+  cao: 1120
+  buoc: 22
+  # Phóng to ảnh bằng Real-ESRGAN anime (để trống "" nếu không dùng), he_so_phong 2 = gấp đôi
+  phong_to: RealESRGAN_x4plus_anime_6B.pth
+  he_so_phong: 2
   cfg: 5
   sampler: euler_ancestral
   # Parallax theo độ sâu (cần torch + transformers, xem docs/anh-ai.md)
@@ -92,7 +97,8 @@ loi:
   - nhan_vat: nguyen_anh
     noi: "Các tướng sĩ! Hôm nay ta lấy lại đất Gia Định."
     ve: >-
-      solo, upper body, determined expression, raising one fist, shouting, standing on the deck of a wooden
+      solo, (upper body:1.3), (close-up:1.1), determined expression, (raising one fist:1.2), shouting,
+      standing on the deck of a wooden
       war junk, wind blowing, battened sails and soldiers with spears in background, river at sunrise,
       from below
     chuyen_dong: day_vao
