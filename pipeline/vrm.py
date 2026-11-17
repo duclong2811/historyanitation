@@ -21,7 +21,7 @@ BIEU_CAM = {
 XUONG = ("hips", "spine", "chest", "upperChest", "neck", "head",
          "leftShoulder", "leftUpperArm", "leftLowerArm", "leftHand",
          "rightShoulder", "rightUpperArm", "rightLowerArm", "rightHand",
-         "leftUpperLeg", "rightUpperLeg")
+         "leftUpperLeg", "leftLowerLeg", "leftFoot", "rightUpperLeg", "rightLowerLeg", "rightFoot")
 
 
 def doc_glb_json(path):

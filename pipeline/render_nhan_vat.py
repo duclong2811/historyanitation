@@ -303,6 +303,100 @@ def dat_tu_the(arm, info, hd, t, n_giay):
             huong_toi(arm, duoi, buong_duoi)
 
 
+# ---------- Động tác Mixamo ----------
+
+# Tên xương Mixamo -> tên xương humanoid VRM
+MIXAMO = {
+    "Hips": "hips", "Spine": "spine", "Spine1": "chest", "Spine2": "upperChest", "Neck": "neck", "Head": "head",
+    "LeftShoulder": "leftShoulder", "LeftArm": "leftUpperArm", "LeftForeArm": "leftLowerArm", "LeftHand": "leftHand",
+    "RightShoulder": "rightShoulder", "RightArm": "rightUpperArm", "RightForeArm": "rightLowerArm",
+    "RightHand": "rightHand", "LeftUpLeg": "leftUpperLeg", "LeftLeg": "leftLowerLeg", "LeftFoot": "leftFoot",
+    "RightUpLeg": "rightUpperLeg", "RightLeg": "rightLowerLeg", "RightFoot": "rightFoot",
+}
+# Xương chỉ khớp hướng (tay, chân); còn lại khớp góc xoay theo thế giới (thân, đầu, bàn tay, bàn chân)
+KHOP_HUONG = {"leftUpperArm", "leftLowerArm", "rightUpperArm", "rightLowerArm",
+              "leftUpperLeg", "leftLowerLeg", "rightUpperLeg", "rightLowerLeg"}
+THU_TU = ["hips", "spine", "chest", "upperChest", "neck", "head",
+          "leftShoulder", "leftUpperArm", "leftLowerArm", "leftHand",
+          "rightShoulder", "rightUpperArm", "rightLowerArm", "rightHand",
+          "leftUpperLeg", "leftLowerLeg", "leftFoot", "rightUpperLeg", "rightLowerLeg", "rightFoot"]
+
+
+def tep_dong_tac(hd):
+    """assets/dong_tac/<hanh_dong>.fbx nếu có (động tác tải từ Mixamo)."""
+    p = GOC / "assets" / "dong_tac" / f"{hd}.fbx"
+    return p if hd and p.exists() else None
+
+
+def nap_mixamo(path):
+    """Nạp FBX Mixamo, trả về (armature nguồn, {tên humanoid: pose bone}, (khung đầu, khung cuối))."""
+    truoc = set(bpy.data.objects)
+    bpy.ops.import_scene.fbx(filepath=str(path), automatic_bone_orientation=False)
+    moi = [o for o in bpy.data.objects if o not in truoc]
+    nguon = next((o for o in moi if o.type == "ARMATURE"), None)
+    if nguon is None or not nguon.animation_data or not nguon.animation_data.action:
+        raise RuntimeError(f"{path.name} không có khung xương hoặc không có chuyển động")
+    for o in moi:
+        o.hide_render = True
+        o.hide_viewport = False
+    xg = {}
+    for pb in nguon.pose.bones:
+        ten = pb.name.split(":")[-1]
+        if ten in MIXAMO:
+            xg[MIXAMO[ten]] = pb
+    if "hips" not in xg:
+        raise RuntimeError(f"{path.name} không giống khung xương Mixamo (thiếu Hips)")
+    bpy.context.view_layer.update()
+    # Cho nhân vật nguồn nhìn về -Y như nhân vật VRM: bên trái nằm phía +X
+    tr, ph = xg.get("leftUpperArm"), xg.get("rightUpperArm")
+    if tr and ph and (nguon.matrix_world @ tr.head).x < (nguon.matrix_world @ ph.head).x:
+        goc = bpy.data.objects.new("nguon_goc", None)
+        bpy.context.scene.collection.objects.link(goc)
+        nguon.parent = goc
+        goc.rotation_euler.z = math.pi
+        bpy.context.view_layer.update()
+    a, b = nguon.animation_data.action.frame_range
+    return nguon, xg, (int(a), int(b))
+
+
+def _quay_the_gioi(obj, pb, nghi=False):
+    m = obj.matrix_world @ (pb.bone.matrix_local if nghi else pb.matrix)
+    return m.to_quaternion()
+
+
+def dat_tu_the_mixamo(arm, info, nguon, xg, f_nguon):
+    """Chép tư thế khung f_nguon của động tác Mixamo sang nhân vật VRM."""
+    sc = bpy.context.scene
+    sc.frame_set(f_nguon)
+    for pb in arm.pose.bones:
+        pb.matrix_basis = Matrix.Identity(4)
+    bpy.context.view_layer.update()
+    q_arm = arm.matrix_world.to_quaternion()
+    for ten in THU_TU:
+        s, d = xg.get(ten), xuong(arm, info, ten)
+        if s is None or d is None:
+            continue
+        if ten in KHOP_HUONG:
+            mw = nguon.matrix_world
+            huong_toi(arm, d, mw @ s.tail - mw @ s.head)
+            continue
+        delta = _quay_the_gioi(nguon, s) @ _quay_the_gioi(nguon, s, nghi=True).inverted()
+        muon = delta @ _quay_the_gioi(arm, d, nghi=True)
+        quay = (q_arm.inverted() @ muon).to_matrix().to_4x4()
+        d.matrix = Matrix.Translation(d.matrix.translation) @ quay
+        bpy.context.view_layer.update()
+    # Hông: chép cả độ nhún lên xuống, tỉ lệ theo chiều cao hông
+    s, d = xg["hips"], xuong(arm, info, "hips")
+    if d is not None:
+        mw = nguon.matrix_world
+        cao_nguon = max(1e-3, (mw @ s.bone.head_local).z)
+        cao_dich = max(1e-3, (arm.matrix_world @ d.bone.head_local).z)
+        lech = ((mw @ s.head) - (mw @ s.bone.head_local)) * (cao_dich / cao_nguon)
+        lech = arm.matrix_world.inverted().to_3x3() @ lech
+        d.matrix = Matrix.Translation(d.matrix.translation + lech) @ d.matrix.to_3x3().to_4x4()
+        bpy.context.view_layer.update()
+
+
 def ghi_khung(arm, f):
     for pb in arm.pose.bones:
         pb.keyframe_insert("rotation_quaternion" if pb.rotation_mode == "QUATERNION" else "rotation_euler", frame=f)
@@ -451,11 +545,21 @@ def render_shot(data, shot, ch, build):
     wav = GOC / shot["giong"] if shot.get("giong") else None
     gia_tri = bieu_cam_tung_khung(bc, shot, fps, wav)
     ds_khung = [max(1, n // 2)] if ch["xem_thu"] else list(range(1, n + 1, buoc))
-    for f in ds_khung:
-        dat_tu_the(arm, info, shot.get("hanh_dong", "dung_yen"), (f - 1) / fps, n / fps)
-        ghi_khung(arm, f)
+    hd = shot.get("hanh_dong", "dung_yen")
+    fbx = tep_dong_tac(hd)
+    if fbx:  # động tác Mixamo: lặp lại nếu shot dài hơn động tác
+        nguon, xg, (a, b) = nap_mixamo(fbx)
+        dai = max(1, b - a)
+        for f in ds_khung:
+            dat_tu_the_mixamo(arm, info, nguon, xg, a + (f - 1) % dai)
+            ghi_khung(arm, f)
+        print(f"  động tác Mixamo: {fbx.name} ({dai} khung)", flush=True)
+    else:
+        for f in ds_khung:
+            dat_tu_the(arm, info, hd, (f - 1) / fps, n / fps)
+            ghi_khung(arm, f)
     ghi_bieu_cam(bc, gia_tri, 1 if ch["xem_thu"] else buoc)
-    dat_tu_the(arm, info, shot.get("hanh_dong", "dung_yen"), 0, n / fps)
+    sc.frame_set(ds_khung[0])
     dat_camera(arm, info, shot, data)
     sc.frame_start, sc.frame_end, sc.frame_step = 1, n, buoc
     if ch["xem_thu"]:

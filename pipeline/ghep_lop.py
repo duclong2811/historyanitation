@@ -17,6 +17,7 @@ import chuyen_dong  # noqa: E402
 from chung import GOC, doc_json  # noqa: E402
 
 PHA_MAU = 0.28  # mức pha màu nhân vật theo nền (0 = giữ nguyên)
+GAN_HON = 1.25  # nhân vật ở gần camera hơn nền: phóng to và trôi mạnh hơn nền chừng này lần
 
 
 def _khung_nhan_vat(thu_muc):
@@ -47,7 +48,8 @@ def ghep_shot(s, build, W, H, chieu_sau, out):
     for f in out.glob("f_*.png"):
         f.unlink()
     cache = (None, None)
-    for i, fr in enumerate(chuyen_dong.cac_khung(nen, do_sau, s, W, H), 1):
+    cam0 = None
+    for i, (fr, cam) in enumerate(chuyen_dong.cac_khung(nen, do_sau, s, W, H, kem_camera=True), 1):
         if so_nv:
             k = max((x for x in so_nv if x <= i), default=so_nv[0])
             if cache[0] != k:
@@ -55,10 +57,22 @@ def ghep_shot(s, build, W, H, chieu_sau, out):
                 if lop.shape[1] != W or lop.shape[0] != H:
                     lop = cv2.resize(lop, (W, H), interpolation=cv2.INTER_LANCZOS4)
                 rgb = np.clip(lop[:, :, :3].astype(np.float32) * nhuom, 0, 255)
-                a = lop[:, :, 3:4].astype(np.float32) / 255.0
-                cache = (k, (rgb, a))
-            rgb, a = cache[1]
-            fr = (fr.astype(np.float32) * (1 - a) + rgb * a).astype(np.uint8)
+                cache = (k, np.dstack([rgb, lop[:, :, 3:4].astype(np.float32)]))
+            lop = cache[1]
+            # Camera: nền ở khung i so với khung đầu phóng to s_nen lần và trôi (dx, dy) điểm ảnh.
+            # Nhân vật ở gần hơn nên đi theo cùng hướng nhưng mạnh hơn (GAN_HON) -> có chiều sâu.
+            cam0 = cam0 or cam
+            k0, cx0, cy0 = cam0
+            ki, cxi, cyi = cam
+            s_nen = k0 / ki
+            dx, dy = (cx0 - cxi) / ki, (cy0 - cyi) / ki
+            sc = 1 + (s_nen - 1) * GAN_HON
+            ax, ay = W * float(s.get("vi_tri", 0.5)), H * 0.42  # nhân vật phóng quanh vùng mặt, ngực
+            M = np.float32([[sc, 0, ax - sc * ax + dx * GAN_HON], [0, sc, ay - sc * ay + dy * GAN_HON]])
+            lop_i = cv2.warpAffine(lop, M, (W, H), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT,
+                                   borderValue=(0, 0, 0, 0)) if (sc != 1 or dx or dy) else lop
+            a = lop_i[:, :, 3:4] / 255.0
+            fr = (fr.astype(np.float32) * (1 - a) + lop_i[:, :, :3] * a).astype(np.uint8)
         cv2.imwrite(str(out / f"f_{i:04d}.png"), fr, [cv2.IMWRITE_PNG_COMPRESSION, 1])
 
 

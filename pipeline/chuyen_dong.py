@@ -96,8 +96,9 @@ def quy_dao(kieu, n):
     return ds
 
 
-def cac_khung(anh_path, do_sau, s, W, H):
-    """Sinh lần lượt từng khung (ảnh BGR W x H) của shot: camera chuyển động trên ảnh tĩnh + parallax."""
+def cac_khung(anh_path, do_sau, s, W, H, kem_camera=False):
+    """Sinh lần lượt từng khung (ảnh BGR W x H) của shot: camera chuyển động trên ảnh tĩnh + parallax.
+    kem_camera=True: sinh (khung, (k, cx, cy)) để lớp nhân vật đi theo đúng chuyển động camera."""
     cv2 = _cv2()
     src = cv2.imread(str(anh_path), cv2.IMREAD_COLOR)
     ih, iw = src.shape[:2]
@@ -129,8 +130,9 @@ def cac_khung(anh_path, do_sau, s, W, H):
             if ox or oy:  # vật gần trôi ngang nhanh hơn khi lia
                 mx = mx + d * p * W * k * np.sign(ox if ox else 0) * 1.5
                 my = my + d * p * H * k * np.sign(oy if oy else 0) * 0.8
-        yield cv2.remap(B, mx.astype(np.float32), my.astype(np.float32), cv2.INTER_LINEAR,
-                        borderMode=cv2.BORDER_REFLECT)
+        fr = cv2.remap(B, mx.astype(np.float32), my.astype(np.float32), cv2.INTER_LINEAR,
+                       borderMode=cv2.BORDER_REFLECT)
+        yield (fr, (k, float(cx), float(cy))) if kem_camera else fr
 
 
 def lam_shot(anh_path, do_sau, s, W, H, out):
