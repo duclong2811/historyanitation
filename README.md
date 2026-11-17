@@ -14,6 +14,13 @@ Có hai chế độ làm hình:
 | **Ảnh AI** (`che_do: anh_ai`) | ComfyUI vẽ ảnh anime chi tiết từ prompt từng shot, pipeline cho camera chuyển động + parallax 2.5D | Hình đẹp, chi tiết kiểu anime. Xem `docs/anh-ai.md` |
 | **Blender** (mặc định) | Dựng cảnh 3D bằng code, render từng shot | Nhân vật cử động tự do, nhất quán tuyệt đối |
 
+## Đạo diễn bằng Claude (skill `dao-dien`)
+
+Repo có sẵn skill `.claude/skills/dao-dien`. Mở repo bằng **Claude Code trên máy bạn** (app Claude Desktop,
+phần Code, chọn thư mục repo), rồi nhắn ví dụ: *"Làm tập về trận Rạch Gầm – Xoài Mút, 8 shot, khổ dọc"*.
+Claude sẽ nghiên cứu bối cảnh, khóa ngoại hình nhân vật, viết prompt từng shot, chạy ComfyUI, **tự xem ảnh để
+sửa**, rồi ra phim. Claude dừng hỏi bạn ở các mốc chính (ý tưởng, nhân vật, duyệt ảnh).
+
 ## Cài đặt (một lần)
 
 1. **Blender 4.2 trở lên**: https://www.blender.org/download/
