@@ -23,6 +23,8 @@ sửa**, rồi ra phim. Claude dừng hỏi bạn ở các mốc chính (ý tư�
 
 ## Cài đặt (một lần)
 
+Cài lại Windows từ đầu? Làm theo [`docs/cai-dat-windows.md`](docs/cai-dat-windows.md) (đủ driver, công cụ, ComfyUI, model).
+
 1. **Blender 4.2 trở lên**: https://www.blender.org/download/
 2. **FFmpeg** có trong PATH. Trên Windows: `winget install Gyan.FFmpeg`
 3. **Python 3.10+** và các gói:
