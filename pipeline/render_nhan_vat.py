@@ -143,8 +143,15 @@ def _anh_mau(m):
     return None
 
 
-def doi_sang_toon(meshes):
-    xong = {}
+def _khop(ten, mau_ten):
+    ten = ten.lower()
+    return next((v for k, v in (mau_ten or {}).items() if k.lower() in ten), None)
+
+
+def vat_lieu_vien():
+    vien = bpy.data.materials.get("net_vien")
+    if vien:
+        return vien
     vien = bpy.data.materials.new("net_vien")
     vien.use_nodes = True
     nt = vien.node_tree
@@ -154,26 +161,44 @@ def doi_sang_toon(meshes):
     o = nt.nodes.new("ShaderNodeOutputMaterial")
     nt.links.new(e.outputs[0], o.inputs["Surface"])
     vien.use_backface_culling = True
+    return vien
+
+
+def them_vien(ob, do_day=0.0035):
+    """Nét viền vỏ ngược: bản sao lưới phình ra, lật mặt, chỉ thấy phần mép."""
+    n_cu = len(ob.data.materials)
+    ob.data.materials.append(vat_lieu_vien())
+    sd = ob.modifiers.new("net_vien", "SOLIDIFY")
+    sd.thickness = do_day
+    sd.offset = 1.0
+    sd.use_flip_normals = True
+    sd.use_rim = False
+    sd.material_offset = n_cu
+
+
+def doi_sang_toon(meshes, doi_mau=None):
+    """doi_mau: {"tên mesh hoặc vật liệu (một phần)": "#màu"} nhuộm lại texture, ví dụ {"wear": "#5a2a2a"}."""
+    xong = {}
     for ob in meshes:
-        for i, slot in enumerate(ob.material_slots):
+        for slot in ob.material_slots:
             m = slot.material
             if m is None:
                 continue
-            if m.name not in xong:
-                xong[m.name] = _toon(m)
-            slot.material = xong[m.name]
-        # Nét viền vỏ ngược: bản sao lưới phình ra, lật mặt, chỉ thấy mép
-        n_cu = len(ob.data.materials)
-        ob.data.materials.append(vien)
-        sd = ob.modifiers.new("net_vien", "SOLIDIFY")
-        sd.thickness = 0.0035
-        sd.offset = 1.0
-        sd.use_flip_normals = True
-        sd.use_rim = False
-        sd.material_offset = n_cu
+            nhuom = _khop(ob.name, doi_mau) or _khop(m.name, doi_mau)
+            key = (m.name, nhuom)
+            if key not in xong:
+                xong[key] = _toon(m, nhuom)
+            slot.material = xong[key]
+        them_vien(ob)
 
 
-def _toon(m_cu):
+def _mau(hex_mau):
+    h = hex_mau.lstrip("#")
+    c = [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+    return tuple(x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4 for x in c) + (1.0,)
+
+
+def _toon(m_cu, nhuom=None):
     tex_cu = _anh_mau(m_cu)
     m = bpy.data.materials.new(m_cu.name + "_toon")
     m.use_nodes = True
@@ -202,10 +227,18 @@ def _toon(m_cu):
         tex = nt.nodes.new("ShaderNodeTexImage")
         tex.image = tex_cu.image
         tex.interpolation = tex_cu.interpolation
-        nt.links.new(tex.outputs["Color"], a_mau)
         alpha = tex.outputs["Alpha"]
+        if nhuom:  # nhuộm: texture x màu mới (vải trắng thành màu mới, hoa văn tối vẫn giữ)
+            nh = nt.nodes.new("ShaderNodeMix")
+            nh.data_type, nh.blend_type = "RGBA", "MULTIPLY"
+            nh.inputs[0].default_value = 1.0
+            nt.links.new(tex.outputs["Color"], next(x for x in nh.inputs if x.identifier == "A_Color"))
+            next(x for x in nh.inputs if x.identifier == "B_Color").default_value = _mau(nhuom)
+            nt.links.new(next(x for x in nh.outputs if x.identifier == "Result_Color"), a_mau)
+        else:
+            nt.links.new(tex.outputs["Color"], a_mau)
     else:
-        a_mau.default_value = tuple(m_cu.diffuse_color)
+        a_mau.default_value = _mau(nhuom) if nhuom else tuple(m_cu.diffuse_color)
     nt.links.new(ra, emi.inputs["Color"])
     if alpha is not None and m_cu.blend_method != "OPAQUE":
         trong = nt.nodes.new("ShaderNodeBsdfTransparent")
@@ -222,6 +255,76 @@ def _toon(m_cu):
         nt.links.new(emi.outputs[0], out.inputs["Surface"])
     m.use_backface_culling = m_cu.use_backface_culling
     return m
+
+
+# ---------- Phụ kiện: khăn vấn, nón dấu, giáo, kiếm ----------
+
+def do_dau(arm, info, meshes):
+    """Đo đầu nhân vật (gồm cả tóc): tâm (x, y), đỉnh z, bán kính."""
+    co = xuong(arm, info, "neck") or xuong(arm, info, "head")
+    z_co = (arm.matrix_world @ co.tail).z if co else 1.3
+    ds = []
+    for ob in meshes:
+        if ob.hide_render:
+            continue
+        mw = ob.matrix_world
+        ds += [mw @ v.co for v in ob.data.vertices if (mw @ v.co).z > z_co + 0.02]
+    if not ds:
+        dau = arm.matrix_world @ xuong(arm, info, "head").head
+        return dau.x, dau.y, dau.z + 0.25, 0.12
+    xs, ys, zs = [p.x for p in ds], [p.y for p in ds], [p.z for p in ds]
+    r = max(max(xs) - min(xs), max(ys) - min(ys)) / 2
+    return (max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2, max(zs), r
+
+
+def gan_phu_kien(arm, info, meshes, ds):
+    """Gắn phụ kiện vào xương (gọi khi nhân vật đang ở tư thế đứng yên để giáo, kiếm đứng thẳng).
+    ds: [{"loai": "khan_van"|"non_dau"|"giao"|"kiem", "mau": "#..."}]"""
+    if not ds:
+        return
+    import blender_tien_ich as t
+    t.ENGINE = "EEVEE" if "EEVEE" in bpy.context.scene.render.engine else "CYCLES"
+    t._VAT_LIEU.clear()  # mỗi shot dựng lại cảnh từ đầu: bỏ vật liệu của shot trước
+    cx, cy, dinh, r = do_dau(arm, info, meshes)
+    for i, pk in enumerate(ds):
+        loai = pk["loai"] if isinstance(pk, dict) else pk
+        mau = pk.get("mau") if isinstance(pk, dict) else None
+        l = t.Luoi()
+        if loai == "khan_van":  # khăn vấn: vành khăn quấn quanh đầu + phần chụp đỉnh
+            m = mau or "#1f1a17"
+            l.tru(r * 0.98, r * 0.95, r * 0.4, (cx, cy + r * 0.04, dinh - r * 1.0), m, canh=24)
+            l.tru(r * 0.95, r * 0.9, r * 0.3, (cx, cy + r * 0.04, dinh - r * 0.66), m, canh=24)
+            l.cau(r * 0.9, (cx, cy + r * 0.06, dinh - r * 0.62), m, ty_le=(1, 1, 0.62), phan=(20, 10))
+            ten_xuong = "head"
+        elif loai == "non_dau":  # nón dấu: nón chóp rộng, chóp kim loại
+            m = mau or "#3a2a1c"
+            l.tru(r * 2.1, r * 0.06, r * 0.85, (cx, cy, dinh - r * 0.3), m, canh=28)
+            l.tru(r * 0.08, 0.0, r * 0.5, (cx, cy, dinh + r * 0.5), "#c9a24a", canh=8)
+            ten_xuong = "head"
+        elif loai in ("giao", "kiem"):
+            tay = xuong(arm, info, "rightHand")
+            if tay is None:
+                continue
+            p = arm.matrix_world @ tay.head.lerp(tay.tail, 0.6)
+            cao = max(1.0, dinh) * (1.25 if loai == "giao" else 0.55)
+            if loai == "giao":  # cán dài thẳng đứng, mũi giáo phía trên
+                l.tru(0.018, 0.018, cao, (p.x, p.y, p.z - cao * 0.45), mau or "#5c4229", canh=8)
+                l.tru(0.04, 0.0, 0.22, (p.x, p.y, p.z + cao * 0.55), "#c0c0b8", canh=6)
+            else:  # kiếm cầm chúc xuống
+                l.tru(0.012, 0.012, 0.12, (p.x, p.y, p.z - 0.04), "#3a2a1c", canh=6)
+                l.khoi((0.09, 0.025, 0.02), (p.x, p.y, p.z - 0.06), "#c9a24a")
+                l.khoi((0.035, 0.008, cao), (p.x, p.y, p.z - 0.06 - cao), mau or "#d8dadc")
+            ten_xuong = "rightHand"
+        else:
+            print(f"  ! Không biết phụ kiện '{loai}'")
+            continue
+        ob = l.tao(f"phu_kien_{i}_{loai}", muot=True)
+        them_vien(ob, 0.003)
+        pb = xuong(arm, info, ten_xuong)
+        mw = ob.matrix_world.copy()
+        ob.parent, ob.parent_type, ob.parent_bone = arm, "BONE", pb.name
+        bpy.context.view_layer.update()
+        ob.matrix_world = mw
 
 
 # ---------- Tư thế và động tác ----------
@@ -537,7 +640,13 @@ def render_shot(data, shot, ch, build):
     nv = shot["tren_hinh"][0]
     cfg = data["nhan_vat"][nv]
     arm, meshes, info, _goc = nap_vrm(cfg["mo_hinh"], build)
-    doi_sang_toon(meshes)
+    for ob in meshes:  # ẩn bộ phận không hợp bối cảnh (phụ kiện hiện đại của mô hình...)
+        if _khop(ob.name, {k: True for k in cfg.get("an", [])}):
+            ob.hide_render = True
+    doi_sang_toon(meshes, cfg.get("doi_mau"))
+    if cfg.get("phu_kien"):
+        dat_tu_the(arm, info, "dung_yen", 0, 1)
+        gan_phu_kien(arm, info, meshes, cfg["phu_kien"])
     anh_sang()
     fps, n = data["fps"], shot["so_frame"]
     buoc = 2 if data["on_twos"] else 1

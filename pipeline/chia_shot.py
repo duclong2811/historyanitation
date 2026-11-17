@@ -92,6 +92,7 @@ def shot_lai(kb, l, w, h, nen):
          "chuyen_dong": l.get("chuyen_dong", "dung_yen"), "tieu_diem": l.get("tieu_diem", [0.5, 0.5])}
     s["_nv"] = {k: s[k] for k in ("tren_hinh", "dang_noi", "camera", "hanh_dong", "cam_xuc", "vi_tri", "goc_quay")}
     s["_nv"]["mo_hinh"] = [hash_tep(nv[n]["mo_hinh"]) for n in s["tren_hinh"]]
+    s["_nv"]["cfg"] = {n: nv[n] for n in s["tren_hinh"]}  # đổi màu, phụ kiện... thì render lại
     s["_nv"]["dong_tac"] = hash_tep(f"assets/dong_tac/{s['hanh_dong']}.fbx")
     s["_nv"]["render"] = [w, h, kb.get("ty_le_render", 100), kb.get("on_twos", True)]
     s["_nv"]["code"] = [hash_tep("pipeline/render_nhan_vat.py"), hash_tep("pipeline/vrm.py")]

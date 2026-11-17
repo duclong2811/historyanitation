@@ -54,6 +54,23 @@ loi:
     chuyen_dong: dung_yen  # chuyển động của nền (như chế độ ảnh AI)
 ```
 
+## Tùy biến nhân vật trong kịch bản
+
+Không cần mở lại VRoid để đổi chi tiết nhỏ:
+
+```yaml
+nhan_vat:
+  nguyen_anh:
+    mo_hinh: assets/nhan_vat/nguyen_anh.vrm
+    an: [robo_arm]                    # ẩn mesh có tên chứa chữ này (phụ kiện không hợp thời kỳ)
+    doi_mau: {wear: "#6a2424"}        # nhuộm mesh hoặc vật liệu có tên chứa chữ này
+    phu_kien:                         # khan_van | non_dau | giao | kiem, cỡ tự tính theo đầu và tay
+      - {loai: khan_van, mau: "#1f1a17"}
+      - {loai: giao}
+```
+
+Tên mesh của mô hình xem trong Blender (bảng Outliner), hoặc gửi file cho Claude để đọc giúp.
+
 ## 3. Động tác Mixamo (đi, chạy, đánh kiếm, chào...)
 
 Ngoài 5 động tác dựng sẵn, `hanh_dong` dùng được **mọi động tác trên Mixamo** (miễn phí, cần tài khoản Adobe).
