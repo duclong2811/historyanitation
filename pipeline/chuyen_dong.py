@@ -96,7 +96,8 @@ def quy_dao(kieu, n):
     return ds
 
 
-def lam_shot(anh_path, do_sau, s, W, H, out):
+def cac_khung(anh_path, do_sau, s, W, H):
+    """Sinh lần lượt từng khung (ảnh BGR W x H) của shot: camera chuyển động trên ảnh tĩnh + parallax."""
     cv2 = _cv2()
     src = cv2.imread(str(anh_path), cv2.IMREAD_COLOR)
     ih, iw = src.shape[:2]
@@ -110,9 +111,7 @@ def lam_shot(anh_path, do_sau, s, W, H, out):
     fx, fy = s.get("tieu_diem", [0.5, 0.45])
     kieu = s.get("chuyen_dong", "day_vao")
     cac = set(kieu.split("+"))
-    for f in out.glob("f_*.png"):
-        f.unlink()
-    for i, (z, ox, oy, pu) in enumerate(quy_dao(kieu, s["so_frame"]), 1):
+    for z, ox, oy, pu in quy_dao(kieu, s["so_frame"]):
         k = Z_MAX / z
         hw, hh = W / 2 * k, H / 2 * k
         # Tâm khung trong ảnh lớn: hướng về tiêu điểm, cộng phần lia, rồi kẹp để không lộ mép ảnh
@@ -130,8 +129,15 @@ def lam_shot(anh_path, do_sau, s, W, H, out):
             if ox or oy:  # vật gần trôi ngang nhanh hơn khi lia
                 mx = mx + d * p * W * k * np.sign(ox if ox else 0) * 1.5
                 my = my + d * p * H * k * np.sign(oy if oy else 0) * 0.8
-        fr = cv2.remap(B, mx.astype(np.float32), my.astype(np.float32), cv2.INTER_LINEAR,
-                       borderMode=cv2.BORDER_REFLECT)
+        yield cv2.remap(B, mx.astype(np.float32), my.astype(np.float32), cv2.INTER_LINEAR,
+                        borderMode=cv2.BORDER_REFLECT)
+
+
+def lam_shot(anh_path, do_sau, s, W, H, out):
+    cv2 = _cv2()
+    for f in out.glob("f_*.png"):
+        f.unlink()
+    for i, fr in enumerate(cac_khung(anh_path, do_sau, s, W, H), 1):
         cv2.imwrite(str(out / f"f_{i:04d}.png"), fr, [cv2.IMWRITE_PNG_COMPRESSION, 1])
 
 

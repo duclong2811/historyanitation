@@ -45,6 +45,15 @@ kịch bản chính), mỗi nhân vật một shot với
 `ve: "solo, full body, standing, front view, simple background, white background"`. Vẽ, xem, sửa `mo_ta`
 đến khi đúng, rồi đưa người dùng duyệt. Duyệt xong mới viết shot.
 
+### Chọn chế độ
+
+- `anh_ai`: mỗi shot một ảnh AI, chỉ camera chuyển động. Hợp với cảnh rộng, phim kể chuyện.
+- `lai`: nền AI vẽ một lần cho mỗi cảnh (`canh.<tên>.ve`), nhân vật là file VRoid `.vrm` render 3D,
+  nhép miệng theo giọng, có `cam_xuc`, `hanh_dong`, `camera` (can|trung|rong), `vi_tri`. Hợp với shot thoại
+  và nhân vật xuất hiện nhiều lần. Nhân vật trong chế độ này **không cần `mo_ta`**: ngoại hình do file VRoid
+  quyết định, nên bỏ qua bước thẻ nhân vật. Chi tiết: `docs/che-do-lai.md`.
+- Có thể làm hai bản kịch bản cho cùng câu chuyện như `gia_dinh_1788_anime.yaml` và `gia_dinh_1788_lai.yaml`.
+
 ### 4. Kịch bản và prompt từng shot
 
 Viết `kich-ban/<ten>.yaml` với `che_do: anh_ai`. Mỗi lời thoại là một shot. Với mỗi shot:

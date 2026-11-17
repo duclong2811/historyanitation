@@ -19,6 +19,10 @@ def doc_kich_ban(duong_dan):
     for k in ("nhan_vat", "loi") if anh_ai else ("nhan_vat", "canh", "loi"):
         if not kb.get(k):
             sys.exit(f"Kịch bản thiếu mục '{k}'.")
+    if kb.get("che_do") == "lai":
+        for ten, c in kb["canh"].items():
+            if not c.get("ve"):
+                sys.exit(f"Chế độ lai: cảnh '{ten}' thiếu 've' (prompt vẽ ảnh nền).")
     for i, l in enumerate(kb["loi"], 1):
         for k in ("nhan_vat", "noi", "ve") if anh_ai else ("canh", "nhan_vat", "noi"):
             if not l.get(k):

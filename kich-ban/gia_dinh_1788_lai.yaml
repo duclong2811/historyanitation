@@ -1,0 +1,105 @@
+# Nguyễn Ánh lấy lại Gia Định (1788), bản LAI: nền AI + nhân vật VRoid 3D nhép miệng theo giọng.
+# Cần: ComfyUI đang mở, file nhân vật VRoid trong assets/nhan_vat/ (xem docs/che-do-lai.md).
+#
+#   python pipeline/chay.py kich-ban/gia_dinh_1788_lai.yaml --xem-thu
+#   python pipeline/chay.py kich-ban/gia_dinh_1788_lai.yaml
+
+tieu_de: "Nguyễn Ánh lấy lại Gia Định (1788)"
+che_do: lai
+kho_hinh: doc
+fps: 30
+on_twos: true        # nhân vật cử động on twos (12-15 hình/giây) đúng chất anime, render nhanh gấp đôi
+ty_le_render: 67
+phu_de: true
+nhac_nen: ""
+am_luong_nhac: 0.15
+
+giong:
+  cach: piper
+  mo_hinh: assets/giong/vi_VN-vais1000-medium.onnx
+  toc_do: 1.15
+
+anh_ai:
+  may_chu: http://127.0.0.1:8188
+  mo_hinh: animagine-xl-4.0-opt.safetensors
+  rong: 640
+  cao: 1120
+  buoc: 22
+  phong_to: RealESRGAN_x4plus_anime_6B.pth
+  he_so_phong: 2
+  cfg: 5
+  chieu_sau: true
+  phong_cach: >-
+    anime screencap, detailed background, cinematic lighting, atmospheric perspective,
+    18th century vietnam, masterpiece, high score, great score, absurdres
+  phong_cach_am: >-
+    lowres, worst quality, low quality, low score, bad score, blurry, text, signature, watermark,
+    chinese architecture, pagoda, great wall, japanese, samurai, kimono, modern, mountains, snow
+
+nhan_vat:
+  nguoi_ke:
+    ten: "Người kể"
+    an_hinh: true
+  nguyen_anh:
+    ten: "Nguyễn Ánh"
+    mo_hinh: assets/nhan_vat/nguyen_anh.vrm     # tạo bằng VRoid Studio
+  linh_tay_son:
+    ten: "Lính Tây Sơn"
+    mo_hinh: assets/nhan_vat/linh_tay_son.vrm
+
+# Mỗi cảnh một ảnh nền, không có người (pipeline tự thêm "no humans, scenery")
+canh:
+  song_ram_dong:
+    ve: >-
+      wide misty river at dawn in the mekong delta, dense nipa palms along the muddy riverbank,
+      tall coconut palms, flat lowland, distant wooden war junks with battened sails, golden sunrise through fog
+  boong_thuyen:
+    ve: >-
+      on the deck of a wooden vietnamese war junk, brown battened sails and mast, ropes, river and
+      other junks behind, sunrise, wind, from low angle
+  choi_canh:
+    ve: >-
+      inside a bamboo watchtower with thatched roof, sharpened wooden palisade below, red flags,
+      wide river with distant sails, morning light
+  don_luy:
+    ve: >-
+      riverside earthen fort with a sharpened wooden palisade, bamboo watchtowers, thatched huts,
+      red flags, coconut palms, smoke rising, war junks approaching on the river, wide shot
+
+loi:
+  - nhan_vat: nguoi_ke
+    canh: song_ram_dong
+    noi: "Năm Mậu Thân, 1788. Sông Bến Nghé mờ sương lúc rạng đông."
+    chuyen_dong: day_vao
+
+  - nhan_vat: nguyen_anh
+    canh: boong_thuyen
+    noi: "Các tướng sĩ! Hôm nay ta lấy lại đất Gia Định."
+    camera: trung
+    hanh_dong: gio_cao
+    cam_xuc: gian
+    vi_tri: 0.45
+
+  - nhan_vat: linh_tay_son
+    canh: choi_canh
+    noi: "Thuyền quân Nguyễn tới rồi! Mau báo cho tướng quân!"
+    camera: trung
+    hanh_dong: chi_tay
+    cam_xuc: ngac_nhien
+
+  - nhan_vat: nguoi_ke
+    canh: don_luy
+    noi: "Tướng Tây Sơn trấn giữ Gia Định là Phạm Văn Tham không chống nổi, phải rút lui."
+    chuyen_dong: keo_ra
+
+  - nhan_vat: nguyen_anh
+    canh: boong_thuyen
+    noi: "Gia Định đã về tay ta."
+    camera: can
+    hanh_dong: gat_dau
+    cam_xuc: vui
+
+  - nhan_vat: nguoi_ke
+    canh: song_ram_dong
+    noi: "Hai năm sau, Nguyễn Ánh cho đắp thành Gia Định. Năm 1802, ông lên ngôi, lấy niên hiệu Gia Long."
+    chuyen_dong: keo_ra+lia_trai

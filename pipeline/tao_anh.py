@@ -132,7 +132,13 @@ def tao(shots_json, chi=None, ve_lai=()):
     out.mkdir(exist_ok=True)
     comfy = ComfyUI(cfg.get("may_chu", "http://127.0.0.1:8188"))
     print("Tạo ảnh AI:")
-    for s in data["shots"]:
+    if data.get("che_do") == "lai":  # chế độ lai: vẽ ảnh nền của từng cảnh
+        dung = {x["nen"] for x in data["shots"] if not chi or x["id"] in chi}
+        muc = [{"id": k, **v} for k, v in data["nen"].items() if k in dung]
+        chi = None
+    else:
+        muc = data["shots"]
+    for s in muc:
         if chi and s["id"] not in chi:
             continue
         dich, h = out / f"{s['id']}.png", out / f"{s['id']}.hash"

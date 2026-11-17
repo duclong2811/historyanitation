@@ -11,6 +11,7 @@ Có hai chế độ làm hình:
 
 | Chế độ | Cách làm hình | Hợp với |
 |---|---|---|
+| **Lai** (`che_do: lai`) | Nền ComfyUI vẽ mỗi cảnh một lần + nhân vật VRoid 3D nhép miệng, biểu cảm, động tác | Nhân vật nhất quán và cử động, nền đẹp. Xem `docs/che-do-lai.md` |
 | **Ảnh AI** (`che_do: anh_ai`) | ComfyUI vẽ ảnh anime chi tiết từ prompt từng shot, pipeline cho camera chuyển động + parallax 2.5D | Hình đẹp, chi tiết kiểu anime. Xem `docs/anh-ai.md` |
 | **Blender** (mặc định) | Dựng cảnh 3D bằng code, render từng shot | Nhân vật cử động tự do, nhất quán tuyệt đối |
 
@@ -81,6 +82,7 @@ Lần đầu chạy, Piper tự tải giọng tiếng Việt (khoảng 60MB). S�
 | `kich-ban/mau.yaml` | Mẫu ngắn để thử pipeline |
 | `kich-ban/gia_dinh_1788.yaml` | Nguyễn Ánh lấy lại Gia Định (1788), bản Blender. Tư liệu: `docs/boi-canh/gia-dinh-1788.md` |
 | `kich-ban/gia_dinh_1788_anime.yaml` | Cùng câu chuyện, bản ảnh AI anime (cần ComfyUI, xem `docs/anh-ai.md`) |
+| `kich-ban/gia_dinh_1788_lai.yaml` | Cùng câu chuyện, bản lai: nền AI + nhân vật VRoid (cần file `.vrm`, xem `docs/che-do-lai.md`) |
 
 Xem thử vài shot cho nhanh:
 

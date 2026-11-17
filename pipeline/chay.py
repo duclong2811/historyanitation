@@ -5,6 +5,7 @@
     python pipeline/chay.py kich-ban/mau.yaml --bo-giong   # giữ giọng đã tạo, không đọc lại
 
 Chế độ ảnh AI (che_do: anh_ai): --xem-thu chỉ vẽ ảnh rồi dừng; --ve-lai s02,s05 vẽ lại với hạt giống mới.
+Chế độ lai (che_do: lai): nền AI cho mỗi cảnh + nhân vật VRoid 3D nhép miệng theo giọng (xem docs/che-do-lai.md).
 
 Tùy chọn khác:
     --may cpu   render bằng CPU (Cycles) khi máy không có GPU
@@ -45,9 +46,9 @@ def tim_blender():
     sys.exit("Không tìm thấy Blender. Cài Blender 4.2+ hoặc đặt biến BLENDER=đường/dẫn/blender.exe")
 
 
-def render(shots, xem_thu, may, chi=None):
+def render(shots, xem_thu, may, chi=None, script="render_blender.py"):
     on_twos = json.loads(Path(shots).read_text(encoding="utf-8")).get("on_twos", True)
-    cmd = tim_blender() + [str(HERE / "render_blender.py"), "--", str(shots)]
+    cmd = tim_blender() + [str(HERE / script), "--", str(shots)]
     if xem_thu:
         cmd.append("--xem-thu")
     if may:
@@ -127,7 +128,17 @@ def main():
     if not xem_thu and not bo_giong:
         giong_doc.tao(kb_path)
     shots = chia_shot.chia(kb_path)
-    if kb.get("che_do") == "anh_ai":
+    if kb.get("che_do") == "lai":
+        import ghep_lop
+        import tao_anh
+        tao_anh.tao(shots, chi.split(",") if chi else None)
+        render(shots, xem_thu, may, chi, script="render_nhan_vat.py")
+        if xem_thu:
+            ghep_lop.xem_thu(shots, chi.split(",") if chi else None)
+            to_xem_thu(thu_muc_build(kb), len(kb["loi"]))
+            return
+        ghep_lop.tao(shots, chi.split(",") if chi else None)
+    elif kb.get("che_do") == "anh_ai":
         import chuyen_dong
         import tao_anh
         ve_lai = a[a.index("--ve-lai") + 1].split(",") if "--ve-lai" in a else ()
